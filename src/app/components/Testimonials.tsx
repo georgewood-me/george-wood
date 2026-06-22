@@ -108,7 +108,7 @@ export default function Testimonials() {
           style={{ border: "1px solid var(--border-color)", borderTop: "none", borderLeft: "none" }}
           aria-label="Previous quote"
         >
-          <img src="/images/left.svg" alt="" width={13} height={8} style={{ filter: "invert(var(--svg-invert))" }} style={{ opacity: canScrollLeft ? 0.7 : 0.2 }} />
+          <img src="/images/left.svg" alt="" width={13} height={8} style={{ filter: "invert(var(--svg-invert))", opacity: canScrollLeft ? 0.7 : 0.2 }} />
         </button>
         <button
           onClick={() => scroll("right")}
