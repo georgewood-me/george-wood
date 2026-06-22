@@ -37,7 +37,7 @@ const testimonials = [
 function QuoteCard({ t, isLast }: { t: (typeof testimonials)[number]; isLast: boolean }) {
   return (
     <div
-      className="w-[400px] shrink-0 p-5 flex flex-col justify-between"
+      className="w-[calc(100vw-32px)] sm:w-[400px] shrink-0 snap-start p-5 flex flex-col justify-between"
       style={{
         borderRight: isLast ? "none" : "1px solid var(--border-color)",
         minHeight: 220,
@@ -75,7 +75,9 @@ export default function Testimonials() {
     if (direction === "right" && !canScrollRight) {
       el.scrollTo({ left: 0, behavior: "smooth" });
     } else {
-      el.scrollBy({ left: direction === "right" ? 400 : -400, behavior: "smooth" });
+      const card = el.querySelector<HTMLElement>(":scope > div");
+      const step = card ? card.offsetWidth : 400;
+      el.scrollBy({ left: direction === "right" ? step : -step, behavior: "smooth" });
     }
   }
 
@@ -83,7 +85,7 @@ export default function Testimonials() {
     <section className="mt-16 -mx-4 relative">
       <div
         ref={scrollRef}
-        className="flex overflow-x-auto"
+        className="flex overflow-x-auto snap-x snap-mandatory"
         style={{
           borderTop: "1px solid var(--border-color)",
           borderBottom: "1px solid var(--border-color)",

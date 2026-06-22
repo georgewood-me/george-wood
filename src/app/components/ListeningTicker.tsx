@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback, type CSSProperties } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 interface Track {
   title: string;
@@ -127,12 +127,13 @@ export default function ListeningTicker() {
   ));
 
   const innerRef = useRef<HTMLSpanElement>(null);
-  const [offset, setOffset] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
 
   useEffect(() => {
     const el = innerRef.current;
-    if (!el) return;
+    const track = trackRef.current;
+    if (!el || !track) return;
 
     let pos = 0;
     let lastTime = performance.now();
@@ -144,18 +145,13 @@ export default function ListeningTicker() {
       const speed = 50;
       pos += speed * dt;
       if (pos >= width) pos -= width;
-      setOffset(-pos);
+      track!.style.transform = `translateX(${-pos}px)`;
       rafRef.current = requestAnimationFrame(tick);
     }
 
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
   }, [songText]);
-
-  const marqueeStyle: CSSProperties = {
-    transform: `translateX(${offset}px)`,
-    willChange: "transform",
-  };
 
   return (
     <div
@@ -167,8 +163,9 @@ export default function ListeningTicker() {
     >
       <SoundWaves />
       <div
+        ref={trackRef}
         className="relative flex whitespace-nowrap text-xs font-medium"
-        style={marqueeStyle}
+        style={{ willChange: "transform" }}
       >
         <span ref={innerRef} className="inline-flex">{items}</span>
         <span className="inline-flex">{items}</span>
