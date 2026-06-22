@@ -148,29 +148,27 @@ export default function ListeningTicker() {
 
   const innerRef = useRef<HTMLSpanElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number>(0);
+  const [animStyle, setAnimStyle] = useState<React.CSSProperties>({ willChange: "transform" });
 
   useEffect(() => {
     const el = innerRef.current;
-    const track = trackRef.current;
-    if (!el || !track) return;
+    if (!el) return;
 
-    let pos = 0;
-    let lastTime = performance.now();
+    const measure = () => {
+      const width = el.offsetWidth;
+      if (width === 0) return;
+      const speed = window.innerWidth < 640 ? 400 : 250;
+      const duration = width / speed;
+      setAnimStyle({
+        willChange: "transform",
+        animation: `marquee-scroll ${duration}s linear infinite`,
+      });
+    };
 
-    function tick(now: number) {
-      const dt = (now - lastTime) / 1000;
-      lastTime = now;
-      const width = el!.scrollWidth;
-      const speed = 50;
-      pos += speed * dt;
-      if (pos >= width) pos -= width;
-      track!.style.transform = `translate3d(${-pos}px,0,0)`;
-      rafRef.current = requestAnimationFrame(tick);
-    }
-
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, [songText]);
 
   return (
@@ -182,10 +180,11 @@ export default function ListeningTicker() {
       }}
     >
       <SoundWaves />
+      <style>{`@keyframes marquee-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }`}</style>
       <div
         ref={trackRef}
         className="relative flex whitespace-nowrap text-xs font-medium"
-        style={{ willChange: "transform" }}
+        style={animStyle}
       >
         <span ref={innerRef} className="inline-flex">{items}</span>
         <span className="inline-flex">{items}</span>

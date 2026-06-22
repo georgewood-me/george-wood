@@ -106,19 +106,19 @@ export default function Testimonials() {
         <button
           onClick={() => scroll("left")}
           disabled={!canScrollLeft}
-          className="flex items-center justify-center w-[40px] h-[40px] hover:opacity-100 transition-opacity"
+          className="flex items-center justify-center w-[48px] h-[48px] hover:opacity-100 transition-opacity"
           style={{ border: "1px solid var(--border-color)", borderTop: "none", borderLeft: "none" }}
           aria-label="Previous quote"
         >
-          <img src="/images/left.svg" alt="" width={13} height={8} style={{ filter: "invert(var(--svg-invert))", opacity: canScrollLeft ? 0.7 : 0.2 }} />
+          <img src="/images/left.svg" alt="" width={16} height={10} style={{ filter: "invert(var(--svg-invert))", opacity: canScrollLeft ? 0.7 : 0.2 }} />
         </button>
         <button
           onClick={() => scroll("right")}
-          className="flex items-center justify-center w-[40px] h-[40px] hover:opacity-100 transition-opacity"
+          className="flex items-center justify-center w-[48px] h-[48px] hover:opacity-100 transition-opacity"
           style={{ border: "1px solid var(--border-color)", borderTop: "none", borderLeft: "none" }}
           aria-label="Next quote"
         >
-          <img src="/images/right.svg" alt="" width={13} height={8} style={{ filter: "invert(var(--svg-invert))" }} className="opacity-70" />
+          <img src="/images/right.svg" alt="" width={16} height={10} style={{ filter: "invert(var(--svg-invert))" }} className="opacity-70" />
         </button>
       </div>
     </section>
