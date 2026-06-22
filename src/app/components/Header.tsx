@@ -173,7 +173,7 @@ export default function Header() {
           width={60}
           height={60}
           className="sm:w-[60px] sm:h-[60px] w-[32px] h-[32px]"
-          style={{ borderRadius: 4 }}
+          style={{ borderRadius: 4, boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)" }}
         />
         <div>
           <p className="font-semibold text-sm leading-tight">George Wood</p>
