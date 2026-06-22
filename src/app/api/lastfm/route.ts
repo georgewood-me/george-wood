@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 
-const API_KEY = process.env.LASTFM_API_KEY!;
+export const dynamic = "force-dynamic";
+
 const USERNAME = "georgewood_me";
 
 export async function GET() {
-  const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${USERNAME}&api_key=${API_KEY}&format=json&limit=1`;
+  const apiKey = process.env.LASTFM_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json({ error: "API key not configured" }, { status: 500 });
+  }
 
-  const res = await fetch(url, { next: { revalidate: 60 } });
+  const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${USERNAME}&api_key=${apiKey}&format=json&limit=1`;
+
+  const res = await fetch(url);
 
   if (!res.ok) {
     return NextResponse.json(
