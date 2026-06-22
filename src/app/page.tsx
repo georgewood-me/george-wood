@@ -19,7 +19,7 @@ export default function Home() {
       <div className="px-4 flex-1">
         <section className="mt-16 text-sm leading-relaxed">
           <p className="mb-4">
-            I&apos;m a Product Designer at Stripe working on Extensibility. Helping to shape how developers and users extend our platform with apps and extensions.
+            I&apos;m a Product Designer at Stripe working in Extensibility. Helping to shape how developers and users extend our platform with apps and extensions.
           </p>
           <p className="mb-4">
             I previously spent over 15 years working in agencies, mainly specialising in designing ecommerce platforms and the tools that empower brands to build and curate campaigns their own way.
