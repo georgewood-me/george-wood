@@ -30,7 +30,7 @@ function SoundWaves() {
 
     const now = performance.now();
     const sc = styleCache.current;
-    if (now - sc.lastRead > 500) {
+    if (now - sc.lastRead > 100) {
       const styles = getComputedStyle(document.documentElement);
       sc.intensity = Number(styles.getPropertyValue("--wave-intensity")) || 1;
       const textColor = styles.getPropertyValue("--text-color").trim() || "#ffffff";
