@@ -101,7 +101,7 @@ export default function ControlPanel() {
     <>
       <button
         onClick={() => setOpen(!open)}
-        className="control-edge fixed bottom-4 right-4 lg:bottom-auto lg:right-auto lg:top-[34px] lg:left-[640px] z-60 w-[40px] h-[40px] flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity"
+        className="control-edge fixed top-[24px] right-[16px] w-[32px] h-[32px] rounded-[4px] lg:rounded-none lg:top-[34px] lg:left-[640px] lg:right-auto lg:w-[40px] lg:h-[40px] z-60 flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity"
         style={{
           border: "1px solid var(--border-color)",
           background: "var(--bg-color)",
@@ -132,7 +132,7 @@ export default function ControlPanel() {
 
       {open && (
         <div
-          className="control-edge fixed bottom-16 right-4 lg:bottom-auto lg:right-auto lg:top-[82px] lg:left-[640px] z-60 w-[260px] p-4 text-xs"
+          className="control-edge fixed top-[64px] right-[16px] lg:top-[82px] lg:left-[640px] lg:right-auto z-60 w-[260px] p-4 text-xs"
           style={{
             border: "1px solid var(--border-color)",
             background: "var(--bg-color)",

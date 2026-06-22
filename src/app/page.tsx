@@ -7,7 +7,7 @@ import ControlPanel from "./components/ControlPanel";
 export default function Home() {
   return (
     <div
-      className="min-h-screen flex flex-col w-full max-w-[640px]"
+      className="relative min-h-screen flex flex-col w-full max-w-[640px]"
       style={{ borderRight: "1px solid var(--border-color)" }}
     >
       <div className="px-4">
