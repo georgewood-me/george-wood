@@ -107,10 +107,13 @@ export default function ListeningTicker() {
   const [track, setTrack] = useState<Track | null>(null);
 
   useEffect(() => {
-    fetch("/api/lastfm")
+    const apiKey = "2e7aa7aba14b552f8cf7b048661ff913";
+    const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=georgewood_me&api_key=${apiKey}&format=json&limit=1`;
+    fetch(url)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && !data.error) setTrack(data);
+        const t = data?.recenttracks?.track?.[0];
+        if (t) setTrack({ title: t.name, artist: t.artist["#text"], nowPlaying: t["@attr"]?.nowplaying === "true" });
       })
       .catch(() => {});
   }, []);
