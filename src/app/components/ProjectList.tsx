@@ -61,16 +61,16 @@ export default function ProjectList() {
           {project.url && (
             <>
               <div className="absolute right-4 top-0 bottom-0 flex items-center z-10">
-                <div className="absolute -left-8 top-0 bottom-0 w-8 pointer-events-none" style={{ background: "linear-gradient(to right, transparent, #0038FF)" }} aria-hidden="true" />
-              <div className="absolute right-0 top-0 bottom-0 -z-10 bg-[#0038FF]" style={{ width: "calc(100% + 2px)" }} aria-hidden="true" />
+                <div className="absolute -left-8 top-0 bottom-0 w-8 pointer-events-none" style={{ background: "linear-gradient(to right, transparent, var(--bg-color))" }} aria-hidden="true" />
+              <div className="absolute right-0 top-0 bottom-0 -z-10 bg-(--bg-color)" style={{ width: "calc(100% + 2px)" }} aria-hidden="true" />
                 {project.disabled ? (
-                  <span className="text-sm opacity-40 line-through bg-[#0038FF]">
+                  <span className="text-sm opacity-40 line-through bg-(--bg-color)">
                     View site ↗
                   </span>
                 ) : (
                   <a
                     href={project.url}
-                    className="text-sm opacity-70 hover:opacity-100 transition-opacity bg-[#0038FF]"
+                    className="text-sm opacity-70 hover:opacity-100 transition-opacity bg-(--bg-color)"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

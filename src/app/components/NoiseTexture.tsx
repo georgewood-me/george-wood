@@ -11,12 +11,11 @@ export default function NoiseTexture() {
 
     let animId: number;
     let lastFrame = 0;
-    const fps = 5;
-    const interval = 1000 / fps;
 
     function tick(timestamp: number) {
       animId = requestAnimationFrame(tick);
-      if (timestamp - lastFrame < interval) return;
+      const fps = Number(getComputedStyle(document.documentElement).getPropertyValue("--noise-speed")) || 5;
+      if (timestamp - lastFrame < 1000 / fps) return;
       lastFrame = timestamp;
       turb!.setAttribute("seed", String(Math.floor(Math.random() * 1000)));
     }
@@ -41,10 +40,9 @@ export default function NoiseTexture() {
         </filter>
       </svg>
       <div
-        className="pointer-events-none fixed inset-0 z-50"
+        className="pointer-events-none fixed inset-0 z-50 noise-layer"
         style={{
           filter: "url(#grain)",
-          opacity: 0.2,
         }}
         aria-hidden="true"
       />

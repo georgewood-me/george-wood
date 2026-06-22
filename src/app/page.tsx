@@ -2,6 +2,7 @@ import Header from "./components/Header";
 import ListeningTicker from "./components/ListeningTicker";
 import ProjectList from "./components/ProjectList";
 import Testimonials from "./components/Testimonials";
+import ControlPanel from "./components/ControlPanel";
 
 export default function Home() {
   return (
@@ -32,10 +33,13 @@ export default function Home() {
         <Testimonials />
       </div>
 
-      <footer className="px-4 py-6 mt-16 flex items-center justify-between text-sm">
+      <footer className="px-4 py-6 mt-16 flex items-center gap-3 text-sm">
         <span className="font-semibold">2026</span>
+        <span className="opacity-40">——</span>
         <a href="https://x.com/georgewood_me" target="_blank" rel="noopener noreferrer" className="opacity-70 hover:opacity-100 transition-opacity">@georgewood_me</a>
       </footer>
+
+      <ControlPanel />
     </div>
   );
 }

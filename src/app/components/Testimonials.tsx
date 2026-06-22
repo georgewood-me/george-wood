@@ -50,7 +50,7 @@ function QuoteCard({ t, isLast }: { t: (typeof testimonials)[number]; isLast: bo
           <p className="text-xs opacity-60">{t.role}</p>
         </div>
         {t.logo && (
-          <Image src={t.logo} alt="" width={100} height={24} className="opacity-70" />
+          <Image src={t.logo} alt="" width={100} height={24} className="opacity-70" style={{ filter: "invert(var(--svg-invert))" }} />
         )}
       </div>
     </div>
@@ -97,7 +97,7 @@ export default function Testimonials() {
       </div>
 
       {canScrollRight && (
-        <div className="absolute inset-y-0 right-0 w-12 pointer-events-none z-10" style={{ background: "linear-gradient(to left, #0038FF, transparent)" }} />
+        <div className="absolute inset-y-0 right-0 w-12 pointer-events-none z-10" style={{ background: "linear-gradient(to left, var(--bg-color), transparent)" }} />
       )}
 
       <div className="flex">
@@ -108,7 +108,7 @@ export default function Testimonials() {
           style={{ border: "1px solid var(--border-color)", borderTop: "none", borderLeft: "none" }}
           aria-label="Previous quote"
         >
-          <img src="/images/left.svg" alt="" width={13} height={8} style={{ opacity: canScrollLeft ? 0.7 : 0.2 }} />
+          <img src="/images/left.svg" alt="" width={13} height={8} style={{ filter: "invert(var(--svg-invert))" }} style={{ opacity: canScrollLeft ? 0.7 : 0.2 }} />
         </button>
         <button
           onClick={() => scroll("right")}
@@ -116,7 +116,7 @@ export default function Testimonials() {
           style={{ border: "1px solid var(--border-color)", borderTop: "none", borderLeft: "none" }}
           aria-label="Next quote"
         >
-          <img src="/images/right.svg" alt="" width={13} height={8} className="opacity-70" />
+          <img src="/images/right.svg" alt="" width={13} height={8} style={{ filter: "invert(var(--svg-invert))" }} className="opacity-70" />
         </button>
       </div>
     </section>

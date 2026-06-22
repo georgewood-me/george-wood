@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, type CSSProperties } from "react";
 
 interface Track {
   title: string;
@@ -44,7 +44,13 @@ function SoundWaves() {
     const offsets = offsetsRef.current;
 
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+    const styles = getComputedStyle(document.documentElement);
+    const intensity = Number(styles.getPropertyValue("--wave-intensity")) || 1;
+    const textColor = styles.getPropertyValue("--text-color").trim() || "#ffffff";
+    const r = parseInt(textColor.slice(1, 3), 16);
+    const g = parseInt(textColor.slice(3, 5), 16);
+    const b = parseInt(textColor.slice(5, 7), 16);
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.12 * intensity})`;
 
     for (let i = 0; i < count; i++) {
       const x = i * step;
@@ -62,7 +68,7 @@ function SoundWaves() {
       // Base height varies per bar so neighbours aren't the same
       const baseHeight = 0.08 + Math.sin(o * 11.3) * 0.04;
       const combined = baseHeight + Math.abs(v1 + v2 + v3);
-      const barHeight = Math.max(1, combined * h);
+      const barHeight = Math.max(1, combined * h * intensity);
 
       // Grow from bottom
       const y = h - barHeight;
@@ -117,6 +123,37 @@ export default function ListeningTicker() {
     <TickerItem key={i} songText={songText} />
   ));
 
+  const innerRef = useRef<HTMLSpanElement>(null);
+  const [offset, setOffset] = useState(0);
+  const rafRef = useRef<number>(0);
+
+  useEffect(() => {
+    const el = innerRef.current;
+    if (!el) return;
+
+    let pos = 0;
+    let lastTime = performance.now();
+
+    function tick(now: number) {
+      const dt = (now - lastTime) / 1000;
+      lastTime = now;
+      const width = el!.scrollWidth;
+      const speed = 50;
+      pos += speed * dt;
+      if (pos >= width) pos -= width;
+      setOffset(-pos);
+      rafRef.current = requestAnimationFrame(tick);
+    }
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [songText]);
+
+  const marqueeStyle: CSSProperties = {
+    transform: `translateX(${offset}px)`,
+    willChange: "transform",
+  };
+
   return (
     <div
       className="relative w-full overflow-hidden py-2"
@@ -128,13 +165,13 @@ export default function ListeningTicker() {
       <SoundWaves />
       <div
         className="relative flex whitespace-nowrap text-xs font-medium"
-        style={{ animation: "marquee 20s linear infinite" }}
+        style={marqueeStyle}
       >
-        <span className="inline-flex">{items}</span>
+        <span ref={innerRef} className="inline-flex">{items}</span>
         <span className="inline-flex">{items}</span>
       </div>
-      <div className="absolute inset-y-0 left-0 w-12 pointer-events-none" style={{ background: "linear-gradient(to right, #0038FF, transparent)" }} />
-      <div className="absolute inset-y-0 right-0 w-12 pointer-events-none" style={{ background: "linear-gradient(to left, #0038FF, transparent)" }} />
+      <div className="absolute inset-y-0 left-0 w-12 pointer-events-none" style={{ background: "linear-gradient(to right, var(--bg-color), transparent)" }} />
+      <div className="absolute inset-y-0 right-0 w-12 pointer-events-none" style={{ background: "linear-gradient(to left, var(--bg-color), transparent)" }} />
     </div>
   );
 }
