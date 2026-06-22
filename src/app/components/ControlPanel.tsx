@@ -6,13 +6,24 @@ const PRESETS = ["#0038FF", "#000000", "#E50000", "#E28C00", "#06CA1D", "#06BDCA
 
 const DEFAULTS = {
   bg: "#0038FF",
-  textColor: "#ffffff" as string,
   noise: 20,
   noiseSpeed: 5,
   marquee: 20,
   waves: 100,
   borders: 20,
 };
+
+function luminance(hex: string) {
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const toLinear = (c: number) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+}
+
+function textColorForBg(bg: string) {
+  return luminance(bg) > 0.179 ? "#000000" : "#ffffff";
+}
 
 function Slider({
   label,
@@ -53,7 +64,7 @@ function Slider({
 export default function ControlPanel() {
   const [open, setOpen] = useState(false);
   const [bg, setBg] = useState(DEFAULTS.bg);
-  const [textColor, setTextColor] = useState(DEFAULTS.textColor);
+  const textColor = textColorForBg(bg);
   const [noise, setNoise] = useState(DEFAULTS.noise);
   const [noiseSpeed, setNoiseSpeed] = useState(DEFAULTS.noiseSpeed);
   const [marquee, setMarquee] = useState(DEFAULTS.marquee);
@@ -73,7 +84,7 @@ export default function ControlPanel() {
     root.style.setProperty("--border-color", `rgba(${borderRgb}, ${borders / 100})`);
     document.body.style.background = bg;
     document.body.style.color = textColor;
-  }, [bg, textColor, noise, noiseSpeed, marquee, waves, borders]);
+  }, [bg, noise, noiseSpeed, marquee, waves, borders]);
 
   function randomize() {
     setBg(
@@ -81,7 +92,6 @@ export default function ControlPanel() {
         .toString(16)
         .padStart(6, "0")}`
     );
-    setTextColor(Math.random() > 0.5 ? "#ffffff" : "#000000");
     setNoise(Math.floor(Math.random() * 50));
     setNoiseSpeed(1 + Math.floor(Math.random() * 24));
     setWaves(Math.floor(Math.random() * 200));
@@ -90,7 +100,6 @@ export default function ControlPanel() {
 
   function reset() {
     setBg(DEFAULTS.bg);
-    setTextColor(DEFAULTS.textColor);
     setNoise(DEFAULTS.noise);
     setNoiseSpeed(DEFAULTS.noiseSpeed);
     setWaves(DEFAULTS.waves);
@@ -177,14 +186,14 @@ export default function ControlPanel() {
                     borderRadius: 4,
                     border:
                       bg === color
-                        ? "2px solid white"
-                        : "1px solid rgba(255,255,255,0.3)",
+                        ? `2px solid ${textColor}`
+                        : "1px solid var(--border-color)",
                   }}
                 />
               ))}
               <label
                 className="w-5 h-5 rounded-full shrink-0 cursor-pointer overflow-hidden"
-                style={{ border: "1px solid rgba(255,255,255,0.3)" }}
+                style={{ border: "1px solid var(--border-color)" }}
               >
                 <input
                   type="color"
@@ -196,29 +205,6 @@ export default function ControlPanel() {
                   +
                 </span>
               </label>
-            </div>
-          </div>
-
-          <div className="mb-4">
-            <div className="flex justify-between mb-1.5">
-              <span className="opacity-60">Text</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="opacity-40">Light</span>
-              <button
-                onClick={() => setTextColor(textColor === "#ffffff" ? "#000000" : "#ffffff")}
-                className="flex items-center w-[40px] h-[20px] rounded-full p-[2px] transition-colors"
-                style={{ background: textColor === "#ffffff" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)", border: "1px solid var(--border-color)" }}
-              >
-                <div
-                  className="w-[14px] h-[14px] rounded-full transition-all"
-                  style={{
-                    background: textColor,
-                    marginLeft: textColor === "#000000" ? 18 : 0,
-                  }}
-                />
-              </button>
-              <span className="opacity-40">Dark</span>
             </div>
           </div>
 
