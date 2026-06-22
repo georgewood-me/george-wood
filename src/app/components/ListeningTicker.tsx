@@ -6,6 +6,7 @@ interface Track {
   title: string;
   artist: string;
   nowPlaying: boolean;
+  image: string;
 }
 
 function SoundWaves() {
@@ -110,11 +111,12 @@ function SoundWaves() {
   );
 }
 
-function TickerItem({ songText }: { songText: string }) {
+function TickerItem({ songText, image }: { songText: string; image: string }) {
   return (
     <span className="inline-flex items-center" style={{ paddingRight: 64 }}>
       <span style={{ opacity: 0.6, letterSpacing: "0.04em" }}>LISTENING TO</span>
-      <span style={{ paddingLeft: 16, letterSpacing: "-0.03em" }}>{songText}</span>
+      {image && <img src={image} alt="" width={16} height={16} style={{ borderRadius: 2, marginLeft: 16, border: "1px solid var(--border-color)" }} />}
+      <span style={{ paddingLeft: image ? 8 : 16, letterSpacing: "-0.03em" }}>{songText}</span>
     </span>
   );
 }
@@ -129,7 +131,7 @@ export default function ListeningTicker() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         const t = data?.recenttracks?.track?.[0];
-        if (t) setTrack({ title: t.name, artist: t.artist["#text"], nowPlaying: t["@attr"]?.nowplaying === "true" });
+        if (t) setTrack({ title: t.name, artist: t.artist["#text"], nowPlaying: t["@attr"]?.nowplaying === "true", image: t.image?.find((img: { size: string }) => img.size === "small")?.["#text"] || "" });
       })
       .catch(() => {});
   }, []);
@@ -138,8 +140,10 @@ export default function ListeningTicker() {
     ? `${track.title}  ——  ${track.artist}`
     : "Song Name  ——  Artist Name";
 
+  const albumImage = track?.image || "";
+
   const items = Array.from({ length: 8 }, (_, i) => (
-    <TickerItem key={i} songText={songText} />
+    <TickerItem key={i} songText={songText} image={albumImage} />
   ));
 
   const innerRef = useRef<HTMLSpanElement>(null);
