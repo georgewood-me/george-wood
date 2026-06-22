@@ -11,9 +11,9 @@ interface Track {
 function SoundWaves() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
-
-  // Per-bar random offsets seeded once so each bar has its own character
   const offsetsRef = useRef<Float32Array | null>(null);
+  const sizeRef = useRef({ w: 0, h: 0 });
+  const styleCache = useRef({ intensity: 1, fill: "rgba(255,255,255,0.12)", lastRead: 0 });
 
   const animate = useCallback(() => {
     const canvas = canvasRef.current;
@@ -21,19 +21,30 @@ function SoundWaves() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
+    const { w, h } = sizeRef.current;
+    if (w === 0 || h === 0) {
+      animRef.current = requestAnimationFrame(animate);
+      return;
+    }
 
-    const w = rect.width;
-    const h = rect.height;
+    const now = performance.now();
+    const sc = styleCache.current;
+    if (now - sc.lastRead > 500) {
+      const styles = getComputedStyle(document.documentElement);
+      sc.intensity = Number(styles.getPropertyValue("--wave-intensity")) || 1;
+      const textColor = styles.getPropertyValue("--text-color").trim() || "#ffffff";
+      const r = parseInt(textColor.slice(1, 3), 16);
+      const g = parseInt(textColor.slice(3, 5), 16);
+      const b = parseInt(textColor.slice(5, 7), 16);
+      sc.fill = `rgba(${r}, ${g}, ${b}, ${0.12 * sc.intensity})`;
+      sc.lastRead = now;
+    }
+
     const barWidth = 2;
     const gap = 2;
     const step = barWidth + gap;
     const count = Math.ceil(w / step);
-    const now = performance.now() / 1000;
+    const t = now / 1000;
 
     if (!offsetsRef.current || offsetsRef.current.length !== count) {
       offsetsRef.current = new Float32Array(count);
@@ -44,33 +55,21 @@ function SoundWaves() {
     const offsets = offsetsRef.current;
 
     ctx.clearRect(0, 0, w, h);
-    const styles = getComputedStyle(document.documentElement);
-    const intensity = Number(styles.getPropertyValue("--wave-intensity")) || 1;
-    const textColor = styles.getPropertyValue("--text-color").trim() || "#ffffff";
-    const r = parseInt(textColor.slice(1, 3), 16);
-    const g = parseInt(textColor.slice(3, 5), 16);
-    const b = parseInt(textColor.slice(5, 7), 16);
-    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.12 * intensity})`;
+    ctx.fillStyle = sc.fill;
+    const intensity = sc.intensity;
 
     for (let i = 0; i < count; i++) {
       const x = i * step;
       const o = offsets[i];
-
-      // Each bar has its own random phase offset and unique speed mix
       const speed1 = 1.4 + Math.sin(o * 3.7) * 0.6;
       const speed2 = 2.1 + Math.cos(o * 5.3) * 0.8;
       const speed3 = 0.7 + Math.sin(o * 1.9) * 0.3;
-
-      const v1 = Math.sin(now * speed1 + o) * 0.4;
-      const v2 = Math.sin(now * speed2 + o * 2.3 + 1.7) * 0.3;
-      const v3 = Math.sin(now * speed3 + o * 0.7 + 4.2) * 0.2;
-
-      // Base height varies per bar so neighbours aren't the same
+      const v1 = Math.sin(t * speed1 + o) * 0.4;
+      const v2 = Math.sin(t * speed2 + o * 2.3 + 1.7) * 0.3;
+      const v3 = Math.sin(t * speed3 + o * 0.7 + 4.2) * 0.2;
       const baseHeight = 0.08 + Math.sin(o * 11.3) * 0.04;
       const combined = baseHeight + Math.abs(v1 + v2 + v3);
       const barHeight = Math.max(1, combined * h * intensity);
-
-      // Grow from bottom
       const y = h - barHeight;
       ctx.beginPath();
       ctx.roundRect(x, y, barWidth, barHeight, 1);
@@ -81,8 +80,25 @@ function SoundWaves() {
   }, []);
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const ro = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      const ctx = canvas.getContext("2d");
+      if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      sizeRef.current = { w: width, h: height };
+    });
+    ro.observe(canvas);
+
     animRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animRef.current);
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(animRef.current);
+    };
   }, [animate]);
 
   return (
@@ -145,7 +161,7 @@ export default function ListeningTicker() {
       const speed = 50;
       pos += speed * dt;
       if (pos >= width) pos -= width;
-      track!.style.transform = `translateX(${-pos}px)`;
+      track!.style.transform = `translate3d(${-pos}px,0,0)`;
       rafRef.current = requestAnimationFrame(tick);
     }
 
