@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "George Wood",
-  description: "George Wood",
+  title: "George Wood • Product Designer",
+  description: "Digital & Product Designer based in Nottingham • George Wood",
   icons: { icon: "/icon.png" },
 };
 
