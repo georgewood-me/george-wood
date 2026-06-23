@@ -74,6 +74,7 @@ export default function ControlPanel() {
   useEffect(() => {
     const root = document.documentElement;
     root.style.setProperty("--bg-color", bg);
+    root.style.setProperty("--bg-color-translucent", `${bg}B3`);
     root.style.setProperty("--text-color", textColor);
     root.style.setProperty("--svg-invert", textColor === "#000000" ? "1" : "0");
     root.style.setProperty("--noise-opacity", String(noise / 100));
@@ -110,11 +111,13 @@ export default function ControlPanel() {
     <>
       <button
         onClick={() => setOpen(!open)}
-        className="control-edge fixed top-[24px] right-[16px] w-[32px] h-[32px] rounded-[4px] lg:rounded-none lg:top-[34px] lg:left-[640px] lg:right-auto lg:w-[40px] lg:h-[40px] z-60 flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity"
+        className="control-edge fixed top-[24px] right-[16px] w-[32px] h-[32px] rounded-[4px] lg:rounded-none lg:top-[34px] lg:left-[640px] lg:right-auto lg:w-[40px] lg:h-[40px] z-40 flex items-center justify-center hover:opacity-100 transition-opacity"
         style={{
           border: "1px solid var(--border-color)",
-          background: "var(--bg-color)",
+          background: "var(--bg-color-translucent)",
           color: "var(--text-color)",
+          WebkitBackdropFilter: "blur(1px)",
+          backdropFilter: "blur(1px)",
         }}
         aria-label="Toggle control panel"
       >
