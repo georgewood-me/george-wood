@@ -35,9 +35,13 @@ body {
 }
 
 @media (min-width: 1024px) {
-  .control-edge {
-    border-left: none !important;
+  .content-container {
+    margin-left: var(--container-ml, 0);
+    margin-right: var(--container-mr, auto);
+    border-left: var(--container-bl, none);
+    border-right: var(--container-br, 1px solid var(--border-color));
   }
+
 }
 
 .control-slider {

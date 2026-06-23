@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const PRESETS = ["#0038FF", "#000000", "#E50000", "#E28C00", "#06CA1D", "#06BDCA", "#CA06CA"];
 
@@ -70,6 +70,31 @@ export default function ControlPanel() {
   const [marquee, setMarquee] = useState(DEFAULTS.marquee);
   const [waves, setWaves] = useState(DEFAULTS.waves);
   const [borders, setBorders] = useState(DEFAULTS.borders);
+  const [align, setAlign] = useState<"left" | "center" | "right">("left");
+  const [isDesktop, setIsDesktop] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    setIsDesktop(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (
+        panelRef.current?.contains(e.target as Node) ||
+        btnRef.current?.contains(e.target as Node)
+      ) return;
+      setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -82,10 +107,16 @@ export default function ControlPanel() {
     root.style.setProperty("--marquee-duration", `${marquee}s`);
     root.style.setProperty("--wave-intensity", String(waves / 100));
     const borderRgb = textColor === "#ffffff" ? "255, 255, 255" : "0, 0, 0";
+    const borderVal = `1px solid rgba(${borderRgb}, ${borders / 100})`;
     root.style.setProperty("--border-color", `rgba(${borderRgb}, ${borders / 100})`);
+    root.style.setProperty("--container-ml", align === "left" ? "0" : "auto");
+    root.style.setProperty("--container-mr", align === "right" ? "0" : "auto");
+    root.style.setProperty("--container-bl", align === "left" ? "none" : borderVal);
+    root.style.setProperty("--container-br", align === "right" ? "none" : borderVal);
+    root.setAttribute("data-align", align);
     document.body.style.background = bg;
     document.body.style.color = textColor;
-  }, [bg, noise, noiseSpeed, marquee, waves, borders]);
+  }, [bg, noise, noiseSpeed, marquee, waves, borders, align]);
 
   function randomize() {
     setBg(
@@ -105,15 +136,20 @@ export default function ControlPanel() {
     setNoiseSpeed(DEFAULTS.noiseSpeed);
     setWaves(DEFAULTS.waves);
     setBorders(DEFAULTS.borders);
+    setAlign("left");
   }
 
   return (
     <>
       <button
+        ref={btnRef}
         onClick={() => setOpen(!open)}
-        className="control-edge fixed top-[24px] right-[16px] w-[32px] h-[32px] rounded-[4px] lg:rounded-none lg:top-[34px] lg:left-[640px] lg:right-auto lg:w-[40px] lg:h-[40px] z-40 flex items-center justify-center hover:opacity-100 transition-opacity"
+        className={`fixed top-[24px] right-[16px] w-[32px] h-[32px] rounded-[4px] lg:rounded-none lg:top-[34px] lg:w-[40px] lg:h-[40px] z-40 flex items-center justify-center hover:opacity-100 transition-opacity ${align === "right" ? "lg:right-[640px] lg:left-auto" : align === "center" ? "lg:left-[calc(50%+320px)] lg:right-auto" : "lg:left-[640px] lg:right-auto"}`}
         style={{
-          border: "1px solid var(--border-color)",
+          borderTop: "1px solid var(--border-color)",
+          borderBottom: "1px solid var(--border-color)",
+          borderLeft: isDesktop && align !== "right" ? "none" : "1px solid var(--border-color)",
+          borderRight: isDesktop && align === "right" ? "none" : "1px solid var(--border-color)",
           background: "var(--bg-color-translucent)",
           color: "var(--text-color)",
           WebkitBackdropFilter: "blur(1px)",
@@ -143,9 +179,13 @@ export default function ControlPanel() {
 
       {open && (
         <div
-          className="control-edge fixed top-[64px] right-[16px] lg:top-[82px] lg:left-[640px] lg:right-auto z-60 w-[260px] p-4 text-xs rounded-[4px] lg:rounded-none"
+          ref={panelRef}
+          className={`fixed top-[64px] right-[16px] lg:top-[82px] z-60 w-[260px] p-4 text-xs rounded-[4px] lg:rounded-none ${align === "right" ? "lg:right-[640px] lg:left-auto" : align === "center" ? "lg:left-[calc(50%+320px)] lg:right-auto" : "lg:left-[640px] lg:right-auto"}`}
           style={{
-            border: "1px solid var(--border-color)",
+            borderTop: "1px solid var(--border-color)",
+            borderBottom: "1px solid var(--border-color)",
+            borderLeft: isDesktop && align !== "right" ? "none" : "1px solid var(--border-color)",
+            borderRight: isDesktop && align === "right" ? "none" : "1px solid var(--border-color)",
             background: "var(--bg-color)",
             color: "var(--text-color)",
           }}
@@ -190,6 +230,27 @@ export default function ControlPanel() {
                   +
                 </span>
               </label>
+            </div>
+          </div>
+
+          <div className="mb-4 hidden lg:block">
+            <div className="mb-1.5">
+              <span>Container</span>
+            </div>
+            <div className="flex gap-1.5">
+              {(["left", "center", "right"] as const).map((option) => (
+                <button
+                  key={option}
+                  onClick={() => setAlign(option)}
+                  className={`flex-1 py-1 text-center ${align === option ? "" : "opacity-60"} hover:opacity-100 transition-opacity`}
+                  style={{
+                    border: `1px solid ${align === option ? textColor : "var(--border-color)"}`,
+                    borderRadius: 2,
+                  }}
+                >
+                  {option === "center" ? "Centre" : option.charAt(0).toUpperCase() + option.slice(1)}
+                </button>
+              ))}
             </div>
           </div>
 
