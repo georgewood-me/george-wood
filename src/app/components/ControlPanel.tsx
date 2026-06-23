@@ -140,7 +140,7 @@ export default function ControlPanel() {
 
       {open && (
         <div
-          className="control-edge fixed top-[64px] right-[16px] lg:top-[82px] lg:left-[640px] lg:right-auto z-60 w-[260px] p-4 text-xs"
+          className="control-edge fixed top-[64px] right-[16px] lg:top-[82px] lg:left-[640px] lg:right-auto z-60 w-[260px] p-4 text-xs rounded-[4px] lg:rounded-none"
           style={{
             border: "1px solid var(--border-color)",
             background: "var(--bg-color)",

@@ -157,7 +157,7 @@ export default function ListeningTicker() {
     const measure = () => {
       const width = el.offsetWidth;
       if (width === 0) return;
-      const speed = window.innerWidth < 640 ? 400 : 250;
+      const speed = window.innerWidth < 640 ? 80 : 50;
       const duration = width / speed;
       setAnimStyle({
         willChange: "transform",
@@ -183,7 +183,7 @@ export default function ListeningTicker() {
       <style>{`@keyframes marquee-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }`}</style>
       <div
         ref={trackRef}
-        className="relative flex whitespace-nowrap text-xs font-medium"
+        className="relative flex w-max whitespace-nowrap text-xs font-medium"
         style={animStyle}
       >
         <span ref={innerRef} className="inline-flex">{items}</span>

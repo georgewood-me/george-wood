@@ -68,3 +68,23 @@ body {
   cursor: pointer;
   border: none;
 }
+
+@media (max-width: 1023px) {
+  .control-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--text-color);
+    cursor: pointer;
+  }
+  .control-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--text-color);
+    cursor: pointer;
+    border: none;
+  }
+}
