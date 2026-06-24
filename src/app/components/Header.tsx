@@ -187,7 +187,7 @@ export default function Header() {
           {weather && (
             <>
               <span>—— {weather.temp}°C</span>
-              <span style={{ marginTop: -2 }}>{(() => { const Icon = WEATHER_ICONS[weather.type]; return <Icon />; })()}</span>
+              <span style={{ marginTop: -1 }}>{(() => { const Icon = WEATHER_ICONS[weather.type]; return <Icon />; })()}</span>
             </>
           )}
         </p>
