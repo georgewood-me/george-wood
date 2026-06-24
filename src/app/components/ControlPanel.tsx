@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 
-const PRESETS = ["#0038FF", "#000000", "#E50000", "#E28C00", "#06CA1D", "#06BDCA", "#CA06CA"];
+const PRESETS = ["#0038FF", "#000000", "#FFFFFF", "#E50000", "#E28C00", "#06CA1D", "#06BDCA", "#CA06CA"];
 
 const DEFAULTS = {
   bg: "#0038FF",
@@ -205,12 +205,12 @@ export default function ControlPanel() {
             <div className="flex justify-between mb-1.5">
               <span>Background</span>
             </div>
-            <div className="flex gap-1.5 items-center">
+            <div className="flex gap-1 items-center">
               {PRESETS.map((color) => (
                 <button
                   key={color}
                   onClick={() => setBg(color)}
-                  className="w-5 h-5 transition-transform hover:scale-110 shrink-0"
+                  className="flex-1 aspect-square transition-transform hover:scale-110"
                   style={{
                     background: color,
                     borderRadius: 2,
@@ -219,8 +219,8 @@ export default function ControlPanel() {
                 />
               ))}
               <label
-                className="w-5 h-5 rounded-full shrink-0 cursor-pointer overflow-hidden"
-                style={{ border: "1px solid var(--border-color)" }}
+                className="flex-1 aspect-square cursor-pointer overflow-hidden"
+                style={{ border: "1px solid var(--border-color)", borderRadius: "50%" }}
               >
                 <input
                   type="color"
@@ -232,42 +232,6 @@ export default function ControlPanel() {
                   +
                 </span>
               </label>
-            </div>
-          </div>
-
-          <div className="mb-4 hidden lg:block">
-            <div className="mb-1.5">
-              <span>Container</span>
-            </div>
-            <div className="flex gap-2">
-              {(["left", "center", "right"] as const).map((option) => {
-                const highlight = option === "left" ? 0 : option === "center" ? 1 : 2;
-                return (
-                  <button
-                    key={option}
-                    onClick={() => setAlign(option)}
-                    className={`flex-1 h-[34px] flex items-center justify-center gap-[1.5px] ${align === option ? "" : "opacity-60"} hover:opacity-100 transition-opacity`}
-                    style={{
-                      border: `1px solid ${align === option ? textColor : "var(--border-color)"}`,
-                      borderRadius: 4,
-                    }}
-                  >
-                    {[0, 1, 2].map((i) => (
-                      <span
-                        key={i}
-                        style={{
-                          display: "block",
-                          width: 3,
-                          height: 10,
-                          borderRadius: 1,
-                          background: "currentColor",
-                          opacity: i === highlight ? 1 : 0.25,
-                        }}
-                      />
-                    ))}
-                  </button>
-                );
-              })}
             </div>
           </div>
 
@@ -304,7 +268,43 @@ export default function ControlPanel() {
             suffix="%"
           />
 
-          <div className="flex gap-2 mt-4">
+          <div className="mt-4 mb-4 hidden lg:block">
+            <div className="mb-1.5">
+              <span>Container</span>
+            </div>
+            <div className="flex gap-2">
+              {(["left", "center", "right"] as const).map((option) => {
+                const highlight = option === "left" ? 0 : option === "center" ? 1 : 2;
+                return (
+                  <button
+                    key={option}
+                    onClick={() => setAlign(option)}
+                    className={`flex-1 h-[34px] flex items-center justify-center gap-[1.5px] ${align === option ? "" : "opacity-60"} hover:opacity-100 transition-opacity`}
+                    style={{
+                      border: `1px solid ${align === option ? textColor : "var(--border-color)"}`,
+                      borderRadius: 4,
+                    }}
+                  >
+                    {[0, 1, 2].map((i) => (
+                      <span
+                        key={i}
+                        style={{
+                          display: "block",
+                          width: 3,
+                          height: 10,
+                          borderRadius: 1,
+                          background: "currentColor",
+                          opacity: i === highlight ? 1 : 0.25,
+                        }}
+                      />
+                    ))}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="pt-4 -mx-4 px-4 flex gap-2" style={{ borderTop: "1px solid var(--border-color)" }}>
             <button
               onClick={randomize}
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[4px] opacity-60 hover:opacity-100 transition-opacity"
