@@ -13,6 +13,7 @@ export default function Home() {
         marginRight: "var(--container-mr, auto)",
         borderLeft: "var(--container-bl, none)",
         borderRight: "var(--container-br, 1px solid var(--border-color))",
+        transition: "margin 0.4s ease",
       }}
     >
       <div className="px-4">

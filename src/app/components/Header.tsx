@@ -180,7 +180,7 @@ export default function Header() {
           <p className="text-sm opacity-70 leading-tight">Product Designer at Stripe</p>
         </div>
       </div>
-      <div className="text-right text-sm">
+      <div className="text-right text-sm lg:mr-[52px]">
         <p className="leading-tight">Nottingham, UK</p>
         <p className="opacity-70 leading-tight flex items-center justify-end gap-1">
           <span>{time}</span>

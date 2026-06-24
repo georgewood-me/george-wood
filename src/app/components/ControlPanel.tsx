@@ -109,8 +109,9 @@ export default function ControlPanel() {
     const borderRgb = textColor === "#ffffff" ? "255, 255, 255" : "0, 0, 0";
     const borderVal = `1px solid rgba(${borderRgb}, ${borders / 100})`;
     root.style.setProperty("--border-color", `rgba(${borderRgb}, ${borders / 100})`);
-    root.style.setProperty("--container-ml", align === "left" ? "0" : "auto");
-    root.style.setProperty("--container-mr", align === "right" ? "0" : "auto");
+    const ml = align === "left" ? "0px" : align === "center" ? "calc(50vw - 320px)" : "calc(100vw - 640px)";
+    root.style.setProperty("--container-ml", ml);
+    root.style.setProperty("--container-mr", "0");
     root.style.setProperty("--container-bl", align === "left" ? "none" : borderVal);
     root.style.setProperty("--container-br", align === "right" ? "none" : borderVal);
     root.setAttribute("data-align", align);
@@ -144,16 +145,18 @@ export default function ControlPanel() {
       <button
         ref={btnRef}
         onClick={() => setOpen(!open)}
-        className={`fixed top-[24px] right-[16px] w-[32px] h-[32px] rounded-[4px] lg:rounded-none lg:top-[34px] lg:w-[40px] lg:h-[40px] z-40 flex items-center justify-center hover:opacity-100 transition-opacity ${align === "right" ? "lg:right-[640px] lg:left-auto" : align === "center" ? "lg:left-[calc(50%+320px)] lg:right-auto" : "lg:left-[640px] lg:right-auto"}`}
+        className="fixed top-[24px] right-[16px] w-[32px] h-[32px] rounded-[4px] lg:top-[34px] lg:w-[40px] lg:h-[40px] z-40 flex items-center justify-center hover:opacity-100 transition-opacity"
         style={{
-          borderTop: "1px solid var(--border-color)",
-          borderBottom: "1px solid var(--border-color)",
-          borderLeft: isDesktop && align !== "right" ? "none" : "1px solid var(--border-color)",
-          borderRight: isDesktop && align === "right" ? "none" : "1px solid var(--border-color)",
+          border: "1px solid var(--border-color)",
           background: "var(--bg-color-translucent)",
           color: "var(--text-color)",
           WebkitBackdropFilter: "blur(1px)",
           backdropFilter: "blur(1px)",
+          ...(isDesktop ? {
+            left: align === "left" ? 584 : align === "center" ? "calc(50vw + 264px)" : "calc(100vw - 56px)",
+            right: "auto",
+            transition: "left 0.4s ease",
+          } : {}),
         }}
         aria-label="Toggle control panel"
       >
@@ -180,14 +183,16 @@ export default function ControlPanel() {
       {open && (
         <div
           ref={panelRef}
-          className={`fixed top-[64px] right-[16px] lg:top-[82px] z-60 w-[260px] p-4 text-xs rounded-[4px] lg:rounded-none ${align === "right" ? "lg:right-[640px] lg:left-auto" : align === "center" ? "lg:left-[calc(50%+320px)] lg:right-auto" : "lg:left-[640px] lg:right-auto"}`}
+          className="fixed top-[64px] right-[16px] lg:top-[82px] z-60 w-[260px] p-4 text-xs rounded-[4px]"
           style={{
-            borderTop: "1px solid var(--border-color)",
-            borderBottom: "1px solid var(--border-color)",
-            borderLeft: isDesktop && align !== "right" ? "none" : "1px solid var(--border-color)",
-            borderRight: isDesktop && align === "right" ? "none" : "1px solid var(--border-color)",
+            border: "1px solid var(--border-color)",
             background: "var(--bg-color)",
             color: "var(--text-color)",
+            ...(isDesktop ? {
+              left: align === "left" ? 364 : align === "center" ? "calc(50vw + 44px)" : "calc(100vw - 276px)",
+              right: "auto",
+              transition: "left 0.4s ease",
+            } : {}),
           }}
         >
           <div className="mb-4">
