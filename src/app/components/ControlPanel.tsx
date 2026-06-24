@@ -237,20 +237,35 @@ export default function ControlPanel() {
             <div className="mb-1.5">
               <span>Container</span>
             </div>
-            <div className="flex gap-1.5">
-              {(["left", "center", "right"] as const).map((option) => (
-                <button
-                  key={option}
-                  onClick={() => setAlign(option)}
-                  className={`flex-1 py-1 text-center ${align === option ? "" : "opacity-60"} hover:opacity-100 transition-opacity`}
-                  style={{
-                    border: `1px solid ${align === option ? textColor : "var(--border-color)"}`,
-                    borderRadius: 2,
-                  }}
-                >
-                  {option === "center" ? "Centre" : option.charAt(0).toUpperCase() + option.slice(1)}
-                </button>
-              ))}
+            <div className="flex gap-2">
+              {(["left", "center", "right"] as const).map((option) => {
+                const highlight = option === "left" ? 0 : option === "center" ? 1 : 2;
+                return (
+                  <button
+                    key={option}
+                    onClick={() => setAlign(option)}
+                    className={`flex-1 h-[34px] flex items-center justify-center gap-[1.5px] ${align === option ? "" : "opacity-60"} hover:opacity-100 transition-opacity`}
+                    style={{
+                      border: `1px solid ${align === option ? textColor : "var(--border-color)"}`,
+                      borderRadius: 4,
+                    }}
+                  >
+                    {[0, 1, 2].map((i) => (
+                      <span
+                        key={i}
+                        style={{
+                          display: "block",
+                          width: 3,
+                          height: 10,
+                          borderRadius: 1,
+                          background: "currentColor",
+                          opacity: i === highlight ? 1 : 0.25,
+                        }}
+                      />
+                    ))}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
