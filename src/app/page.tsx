@@ -38,9 +38,21 @@ export default function Home() {
         <Testimonials />
       </div>
 
-      <footer className="px-4 py-6 mt-16 flex items-center justify-between text-sm">
-        <span className="font-semibold">2026</span>
-        <a href="https://x.com/georgewood_me" target="_blank" rel="noopener noreferrer" className="opacity-70 hover:opacity-100 transition-opacity">@georgewood_me</a>
+      <footer
+        className="mt-16 flex items-center justify-between text-sm"
+        style={{ borderTop: "1px solid var(--border-color)" }}
+      >
+        <span
+          className="font-semibold py-4 px-4"
+          style={{ borderRight: "1px solid var(--border-color)" }}
+        >2026</span>
+        <a
+          href="https://x.com/georgewood_me"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="opacity-70 hover:opacity-100 transition-opacity py-4 px-4"
+          style={{ borderLeft: "1px solid var(--border-color)" }}
+        >@georgewood_me</a>
       </footer>
 
       <ControlPanel />
