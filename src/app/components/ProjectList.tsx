@@ -52,7 +52,7 @@ export default function ProjectList() {
             borderBottom: "1px solid var(--border-color)",
           }}
         >
-          <div className="flex items-center gap-3 overflow-hidden">
+          <div className="flex items-center gap-2 overflow-hidden">
             <span className="text-sm font-semibold shrink-0">{project.name}</span>
             {project.awards.map((award, j) => (
               <span
