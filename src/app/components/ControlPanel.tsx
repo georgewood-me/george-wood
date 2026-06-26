@@ -145,7 +145,7 @@ export default function ControlPanel() {
       <button
         ref={btnRef}
         onClick={() => setOpen(!open)}
-        className={`fixed top-[24px] right-[16px] w-[32px] h-[32px] rounded-[4px] lg:top-[34px] lg:w-[40px] lg:h-[40px] z-40 flex items-center justify-center hover:opacity-100 transition-opacity${!open ? " control-btn-glow" : ""}`}
+        className="fixed top-[24px] right-[16px] w-[32px] h-[32px] rounded-[4px] lg:top-[34px] lg:w-[40px] lg:h-[40px] z-40 flex items-center justify-center hover:opacity-100 transition-opacity control-btn-glow"
         style={{
           border: "1px solid var(--border-color)",
           background: "var(--bg-color-translucent)",
