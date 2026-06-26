@@ -114,8 +114,16 @@ function SoundWaves() {
 function TickerItem({ songText, image }: { songText: { title: string; artist: string }; image: string }) {
   return (
     <span className="inline-flex items-center" style={{ paddingRight: 64 }}>
-      {image && <img src={image} alt="" width={16} height={16} style={{ borderRadius: 2, border: "1px solid var(--border-color)" }} />}
-      <span className="font-medium" style={{ paddingLeft: image ? 8 : 0, letterSpacing: "-0.03em" }}>{songText.title}</span>
+      {image ? (
+        <img src={image} alt="" width={16} height={16} style={{ borderRadius: 2, border: "1px solid var(--border-color)" }} />
+      ) : (
+        <svg width={14} height={14} viewBox="0 0 24 24" fill="currentColor" style={{ opacity: 0.4 }}>
+          <path d="M9 18V5l12-2v13" />
+          <circle cx="6" cy="18" r="3" />
+          <circle cx="18" cy="16" r="3" />
+        </svg>
+      )}
+      <span className="font-medium" style={{ paddingLeft: 8, letterSpacing: "-0.03em" }}>{songText.title}</span>
       <span className="font-normal" style={{ paddingLeft: 6, letterSpacing: "-0.03em", opacity: 0.5 }}>{songText.artist}</span>
     </span>
   );
