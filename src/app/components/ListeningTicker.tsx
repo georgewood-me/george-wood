@@ -111,12 +111,12 @@ function SoundWaves() {
   );
 }
 
-function TickerItem({ songText, image }: { songText: string; image: string }) {
+function TickerItem({ songText, image }: { songText: { title: string; artist: string }; image: string }) {
   return (
     <span className="inline-flex items-center" style={{ paddingRight: 64 }}>
-      <span style={{ opacity: 0.6, letterSpacing: "0.04em" }}>LISTENING TO</span>
-      {image && <img src={image} alt="" width={16} height={16} style={{ borderRadius: 2, marginLeft: 16, border: "1px solid var(--border-color)" }} />}
-      <span style={{ paddingLeft: image ? 8 : 16, letterSpacing: "-0.03em" }}>{songText}</span>
+      {image && <img src={image} alt="" width={16} height={16} style={{ borderRadius: 2, border: "1px solid var(--border-color)" }} />}
+      <span className="font-medium" style={{ paddingLeft: image ? 8 : 0, letterSpacing: "-0.03em" }}>{songText.title}</span>
+      <span className="font-normal" style={{ paddingLeft: 6, letterSpacing: "-0.03em", opacity: 0.5 }}>{songText.artist}</span>
     </span>
   );
 }
@@ -137,8 +137,8 @@ export default function ListeningTicker() {
   }, []);
 
   const songText = track
-    ? `${track.title}  ——  ${track.artist}`
-    : "Song Name  ——  Artist Name";
+    ? { title: track.title, artist: track.artist }
+    : { title: "Song Name", artist: "Artist Name" };
 
   const albumImage = track?.image || "";
 
@@ -169,7 +169,7 @@ export default function ListeningTicker() {
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [songText]);
+  }, [`${songText.title} ${songText.artist}`]);
 
   return (
     <div
@@ -189,8 +189,14 @@ export default function ListeningTicker() {
         <span ref={innerRef} className="inline-flex">{items}</span>
         <span className="inline-flex">{items}</span>
       </div>
-      <div className="absolute inset-y-0 left-0 w-12 pointer-events-none" style={{ background: "linear-gradient(to right, var(--bg-color), transparent)" }} />
-      <div className="absolute inset-y-0 right-0 w-12 pointer-events-none" style={{ background: "linear-gradient(to left, var(--bg-color), transparent)" }} />
+      <div className="absolute inset-y-0 left-0 z-10 pointer-events-none" style={{ width: 150, background: "linear-gradient(to right, var(--bg-color) 70%, transparent)" }} />
+      <span
+        className="absolute inset-y-0 left-0 z-20 text-xs flex items-center pl-4"
+        style={{ opacity: 0.6, letterSpacing: "0.04em" }}
+      >
+        LISTENING TO
+      </span>
+      <div className="absolute inset-y-0 right-0 w-12 pointer-events-none z-10" style={{ background: "linear-gradient(to left, var(--bg-color), transparent)" }} />
     </div>
   );
 }
