@@ -180,7 +180,7 @@ export default function ControlPanel() {
       {open && (
         <div
           ref={panelRef}
-          className="fixed top-[64px] right-[16px] lg:top-[82px] z-60 w-[260px] p-4 text-xs rounded-[4px]"
+          className="fixed top-[64px] right-[16px] lg:top-[82px] z-60 w-[260px] p-4 text-xs rounded-[4px] control-btn-glow"
           style={{
             border: "1px solid var(--border-color)",
             background: "var(--bg-color)",
