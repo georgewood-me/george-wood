@@ -11,9 +11,11 @@ export async function GET() {
     const films: { title: string; year: string; rating: number; poster: string; url: string }[] = [];
     const items = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
 
+    const decode = (s: string) => s.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+
     for (const item of items) {
       if (films.length >= 6) break;
-      const title = item.match(/letterboxd:filmTitle>([^<]+)</)?.[1] || "";
+      const title = decode(item.match(/letterboxd:filmTitle>([^<]+)</)?.[1] || "");
       const year = item.match(/letterboxd:filmYear>([^<]+)</)?.[1] || "";
       const ratingStr = item.match(/letterboxd:memberRating>([^<]+)</)?.[1];
       const rating = ratingStr ? parseFloat(ratingStr) : 0;
