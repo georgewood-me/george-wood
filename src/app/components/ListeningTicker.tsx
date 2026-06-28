@@ -180,7 +180,7 @@ export default function ListeningTicker() {
 
   return (
     <div
-      className="relative w-full overflow-hidden py-2"
+      className="glass-marquee relative w-full overflow-hidden py-2"
       style={{
         borderTop: "1px solid var(--border-color)",
         borderBottom: "1px solid var(--border-color)",
