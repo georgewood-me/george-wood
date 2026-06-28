@@ -170,6 +170,10 @@ export default function ControlPanel() {
       const fontValue = getComputedStyle(document.body).getPropertyValue(activeFont.cssVar).trim();
       root.style.setProperty("--active-font", fontValue);
     }
+    const bgLum = luminance(bg);
+    const textLum = luminance(textColor);
+    root.style.setProperty("--duotone-highlight", bgLum > textLum ? bg : textColor);
+    root.style.setProperty("--duotone-shadow", bgLum > textLum ? textColor : bg);
     const borderRgb = textColor === "#ffffff" ? "255, 255, 255" : "0, 0, 0";
     root.style.setProperty("--border-color", `rgba(${borderRgb}, ${borders / 100})`);
     const borderVal = `1px solid rgba(${borderRgb}, ${borders / 100})`;

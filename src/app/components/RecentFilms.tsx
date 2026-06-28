@@ -14,7 +14,7 @@ function Stars({ rating }: { rating: number }) {
   const full = Math.floor(rating);
   const half = rating % 1 >= 0.5;
   return (
-    <span className="flex gap-[1px]">
+    <span className="flex gap-px">
       {Array.from({ length: 5 }, (_, i) => (
         <svg key={i} width="10" height="10" viewBox="0 0 24 24" fill={i < full ? "currentColor" : i === full && half ? "url(#half)" : "none"} stroke="currentColor" strokeWidth="1.5">
           {i === full && half && (
@@ -34,7 +34,6 @@ function Stars({ rating }: { rating: number }) {
 
 export default function RecentFilms() {
   const [films, setFilms] = useState<Film[]>([]);
-
   useEffect(() => {
     fetch("/api/letterboxd")
       .then((res) => res.json())
@@ -46,7 +45,7 @@ export default function RecentFilms() {
 
   return (
     <section className="mt-16">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <span className="text-xs" style={{ opacity: 0.7, letterSpacing: "0.04em" }}>RECENTLY WATCHED</span>
         <a
           href="https://letterboxd.com/Woody7Figure/"
@@ -67,14 +66,29 @@ export default function RecentFilms() {
             className="group"
           >
             <div
-              className="aspect-[2/3] rounded-[4px] overflow-hidden mb-2"
+              className="aspect-2/3 rounded-[4px] overflow-hidden mb-2 relative"
               style={{ border: "1px solid var(--border-color)" }}
             >
               <img
                 src={film.poster}
                 alt={film.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-cover absolute inset-0"
               />
+              <div
+                className="absolute inset-0 transition-opacity duration-500 group-hover:opacity-0"
+                style={{ background: "var(--duotone-highlight)" }}
+              >
+                <img
+                  src={film.poster}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  style={{ filter: "grayscale(1) contrast(1.1)", mixBlendMode: "multiply" }}
+                />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{ background: "var(--duotone-shadow)", mixBlendMode: "lighten" }}
+                />
+              </div>
             </div>
             <p className="text-xs font-medium truncate">{film.title}</p>
             <div className="flex items-center gap-1.5 mt-0.5">
