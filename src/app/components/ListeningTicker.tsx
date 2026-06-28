@@ -117,10 +117,9 @@ function TickerItem({ songText, image }: { songText: { title: string; artist: st
       {image ? (
         <img src={image} alt="" width={16} height={16} style={{ borderRadius: 2, border: "1px solid var(--border-color)" }} />
       ) : (
-        <svg width={14} height={14} viewBox="0 0 24 24" fill="currentColor" style={{ opacity: 0.4 }}>
-          <path d="M9 18V5l12-2v13" />
-          <circle cx="6" cy="18" r="3" />
-          <circle cx="18" cy="16" r="3" />
+        <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+          <circle cx="8" cy="18" r="4" />
+          <path d="M12 18V2l7 4" />
         </svg>
       )}
       <span className="font-medium" style={{ paddingLeft: 8, letterSpacing: "-0.03em" }}>{songText.title}</span>
