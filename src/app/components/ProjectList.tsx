@@ -57,7 +57,7 @@ export default function ProjectList() {
             {project.awards.map((award, j) => (
               <span
                 key={j}
-                className="text-xs px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap"
+                className="glass-pill text-xs px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap"
                 style={{ border: "1px solid var(--border-color)" }}
               >
                 {award}

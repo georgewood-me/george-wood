@@ -167,14 +167,15 @@ export default function Header() {
   return (
     <header className="flex items-end sm:items-center justify-between py-6">
       <div className="flex gap-3 flex-col items-start sm:flex-row sm:items-center">
-        <Image
-          src="/images/avatar.png"
-          alt="George Wood"
-          width={60}
-          height={60}
-          className="sm:w-[60px] sm:h-[60px] w-[32px] h-[32px]"
-          style={{ borderRadius: 4, boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)" }}
-        />
+        <div className="glass-poster relative" style={{ borderRadius: 4, overflow: "hidden", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)" }}>
+          <Image
+            src="/images/avatar.png"
+            alt="George Wood"
+            width={60}
+            height={60}
+            className="sm:w-[60px] sm:h-[60px] w-[32px] h-[32px] block"
+          />
+        </div>
         <div>
           <p className="font-semibold text-sm leading-tight">George Wood</p>
           <p className="text-sm opacity-70 leading-tight">Product Designer at Stripe</p>

@@ -66,7 +66,7 @@ export default function RecentFilms() {
             className="group"
           >
             <div
-              className="aspect-2/3 rounded-[4px] overflow-hidden mb-2 relative"
+              className="glass-poster aspect-2/3 rounded-[4px] overflow-hidden mb-2 relative"
               style={{ border: "1px solid var(--border-color)" }}
             >
               <img
