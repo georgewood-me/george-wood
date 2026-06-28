@@ -43,11 +43,11 @@ function QuoteCard({ t, isLast }: { t: (typeof testimonials)[number]; isLast: bo
         minHeight: 220,
       }}
     >
-      <p className="text-sm leading-relaxed opacity-80 whitespace-normal">{t.quote}</p>
+      <p className="text-sm leading-relaxed whitespace-normal">{t.quote}</p>
       <div className="flex items-end justify-between mt-6">
         <div>
           <p className="text-xs font-semibold">{t.name}</p>
-          <p className="text-xs opacity-60">{t.role}</p>
+          <p className="text-xs opacity-50">{t.role}</p>
         </div>
         {t.logo && (
           <Image src={t.logo} alt="" width={100} height={24} className="opacity-70" style={{ filter: "invert(var(--svg-invert))" }} />
