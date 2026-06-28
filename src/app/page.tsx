@@ -2,6 +2,7 @@ import Header from "./components/Header";
 import ListeningTicker from "./components/ListeningTicker";
 import ProjectList from "./components/ProjectList";
 import Testimonials from "./components/Testimonials";
+import RecentFilms from "./components/RecentFilms";
 import ControlPanel from "./components/ControlPanel";
 
 export default function Home() {
@@ -37,6 +38,7 @@ export default function Home() {
 
         <ProjectList />
         <Testimonials />
+        <RecentFilms />
       </div>
 
       <footer

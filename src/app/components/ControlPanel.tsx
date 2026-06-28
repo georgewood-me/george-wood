@@ -260,8 +260,8 @@ export default function ControlPanel() {
             className="aspect-square cursor-pointer overflow-hidden flex items-center justify-center"
             style={{
               borderRadius: 3,
-              border: "1px solid var(--border-color)",
-              boxShadow: "0 0 0 2px var(--bg-color), 0 0 0 3px var(--border-color)",
+              border: "none",
+              boxShadow: "0 0 0 1px var(--border-color)",
             }}
           >
             <input
