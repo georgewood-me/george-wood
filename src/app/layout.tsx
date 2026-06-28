@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Bricolage_Grotesque, Archivo_Narrow, Inconsolata } from "next/font/google";
 import NoiseTexture from "./components/NoiseTexture";
 import ScanLines from "./components/ScanLines";
+import CursorTrail from "./components/CursorTrail";
 import "./globals.css";
 
 const inter = Inter({
@@ -40,6 +41,7 @@ export default function RootLayout({
       <body suppressHydrationWarning className={`${inter.variable} ${bricolage.variable} ${archivo.variable} ${inconsolata.variable} antialiased`}>
         <NoiseTexture />
         <ScanLines />
+        <CursorTrail />
         {children}
       </body>
     </html>

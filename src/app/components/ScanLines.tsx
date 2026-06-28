@@ -18,6 +18,8 @@ export default function ScanLines() {
 
   if (intensity === 0) return null;
 
+  const t = intensity / 100;
+
   return (
     <div
       className="fixed inset-0 pointer-events-none z-[999]"
@@ -27,11 +29,11 @@ export default function ScanLines() {
           0deg,
           transparent,
           transparent 2px,
-          rgba(0, 0, 0, ${0.06 * (intensity / 100)}) 2px,
-          rgba(0, 0, 0, ${0.06 * (intensity / 100)}) 4px
+          rgba(0, 0, 0, ${0.06 * t}) 2px,
+          rgba(0, 0, 0, ${0.06 * t}) 4px
         )`,
-        animation: intensity > 50 ? "scanline-flicker 0.1s infinite" : undefined,
-        opacity: intensity / 100,
+        animation: t > 0.2 ? `scanline-flicker ${0.08 - t * 0.04}s infinite` : undefined,
+        opacity: t,
       }}
     />
   );

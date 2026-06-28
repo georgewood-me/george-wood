@@ -19,6 +19,7 @@ const DEFAULTS = {
   waves: 100,
   borders: 20,
   scanlines: 0,
+  cursorTrail: 0,
 };
 
 function luminance(hex: string) {
@@ -80,6 +81,7 @@ export default function ControlPanel() {
   const [waves, setWaves] = useState(DEFAULTS.waves);
   const [borders, setBorders] = useState(DEFAULTS.borders);
   const [scanlines, setScanlines] = useState(DEFAULTS.scanlines);
+  const [cursorTrail, setCursorTrail] = useState(DEFAULTS.cursorTrail);
   const [font, setFont] = useState("inter");
   const [align, setAlign] = useState<"left" | "center" | "right">("left");
   const [gloss, setGloss] = useState(false);
@@ -115,6 +117,7 @@ export default function ControlPanel() {
     if (params.has("w")) setWaves(Number(params.get("w")));
     if (params.has("b")) setBorders(Number(params.get("b")));
     if (params.has("sl")) setScanlines(Number(params.get("sl")));
+    if (params.has("ct")) setCursorTrail(Number(params.get("ct")));
     if (params.has("f")) setFont(params.get("f")!);
     if (params.has("a")) setAlign(params.get("a") as "left" | "center" | "right");
     if (params.has("g")) setGloss(params.get("g") === "1");
@@ -167,6 +170,8 @@ export default function ControlPanel() {
     root.style.setProperty("--marquee-duration", `${marquee}s`);
     root.style.setProperty("--wave-intensity", String(waves / 100));
     root.style.setProperty("--scanlines", String(scanlines));
+    root.style.setProperty("--cursor-trail", String(cursorTrail));
+    root.setAttribute("data-cursor-trail", String(cursorTrail > 0));
     const activeFont = FONTS.find((f) => f.name === font);
     if (activeFont) {
       const fontValue = getComputedStyle(document.body).getPropertyValue(activeFont.cssVar).trim();
@@ -188,7 +193,7 @@ export default function ControlPanel() {
     root.setAttribute("data-gloss", String(gloss));
     document.body.style.background = bg;
     document.body.style.color = textColor;
-  }, [bg, noise, noiseSpeed, marquee, waves, borders, scanlines, font, align, gloss]);
+  }, [bg, noise, noiseSpeed, marquee, waves, borders, scanlines, cursorTrail, font, align, gloss]);
 
   function randomize() {
     setBg(
@@ -206,7 +211,7 @@ export default function ControlPanel() {
   function share() {
     const params = new URLSearchParams({
       bg, n: String(noise), ns: String(noiseSpeed), w: String(waves),
-      b: String(borders), sl: String(scanlines),
+      b: String(borders), sl: String(scanlines), ct: String(cursorTrail),
       f: font, a: align, g: gloss ? "1" : "0",
     });
     const url = `${window.location.origin}${window.location.pathname}?${params}`;
@@ -239,6 +244,7 @@ export default function ControlPanel() {
     setWaves(DEFAULTS.waves);
     setBorders(DEFAULTS.borders);
     setScanlines(DEFAULTS.scanlines);
+    setCursorTrail(DEFAULTS.cursorTrail);
     setFont("inter");
     setAlign("left");
     setGloss(false);
@@ -367,6 +373,17 @@ export default function ControlPanel() {
           </svg>
           <span>Reset</span>
         </button>
+        {isDesktop && (
+          <button
+            onClick={() => setCursorTrail(cursorTrail > 0 ? 0 : 100)}
+            className={`glass-btn h-[34px] flex items-center justify-center px-3 rounded-[4px] hover:opacity-100 ${cursorTrail > 0 ? "" : "opacity-60"}`}
+            style={{ borderRadius: 4, ...(cursorTrail > 0 ? { border: "1px solid color-mix(in srgb, var(--text-color) 60%, transparent)" } : {}) }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 4l7.07 17 2.51-7.39L21 11.07z" />
+            </svg>
+          </button>
+        )}
         <button
           onClick={share}
           className="glass-btn h-[34px] flex items-center justify-center px-3 rounded-[4px] opacity-60 hover:opacity-100"
