@@ -4,6 +4,13 @@ import { useState, useEffect, useRef } from "react";
 
 const PRESETS = ["#0038FF", "#000000", "#FFFFFF", "#E50000", "#E28C00", "#06CA1D", "#06BDCA", "#CA06CA"];
 
+const FONTS = [
+  { label: "Aa", cssVar: "--font-inter", name: "inter" },
+  { label: "Aa", cssVar: "--font-bricolage", name: "bricolage" },
+  { label: "Aa", cssVar: "--font-archivo", name: "archivo" },
+  { label: "Aa", cssVar: "--font-inconsolata", name: "inconsolata" },
+] as const;
+
 const DEFAULTS = {
   bg: "#0038FF",
   noise: 20,
@@ -11,6 +18,7 @@ const DEFAULTS = {
   marquee: 20,
   waves: 100,
   borders: 20,
+  scanlines: 0,
 };
 
 function luminance(hex: string) {
@@ -70,7 +78,12 @@ export default function ControlPanel() {
   const [marquee, setMarquee] = useState(DEFAULTS.marquee);
   const [waves, setWaves] = useState(DEFAULTS.waves);
   const [borders, setBorders] = useState(DEFAULTS.borders);
+  const [scanlines, setScanlines] = useState(DEFAULTS.scanlines);
+  const [font, setFont] = useState("inter");
   const [align, setAlign] = useState<"left" | "center" | "right">("left");
+  const [toastMounted, setToastMounted] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isDesktop, setIsDesktop] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
@@ -81,6 +94,18 @@ export default function ControlPanel() {
     const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("bg")) setBg(params.get("bg")!);
+    if (params.has("n")) setNoise(Number(params.get("n")));
+    if (params.has("ns")) setNoiseSpeed(Number(params.get("ns")));
+    if (params.has("w")) setWaves(Number(params.get("w")));
+    if (params.has("b")) setBorders(Number(params.get("b")));
+    if (params.has("sl")) setScanlines(Number(params.get("sl")));
+    if (params.has("f")) setFont(params.get("f")!);
+    if (params.has("a")) setAlign(params.get("a") as "left" | "center" | "right");
   }, []);
 
   useEffect(() => {
@@ -106,6 +131,12 @@ export default function ControlPanel() {
     root.style.setProperty("--noise-speed", String(noiseSpeed));
     root.style.setProperty("--marquee-duration", `${marquee}s`);
     root.style.setProperty("--wave-intensity", String(waves / 100));
+    root.style.setProperty("--scanlines", String(scanlines));
+    const activeFont = FONTS.find((f) => f.name === font);
+    if (activeFont) {
+      const fontValue = getComputedStyle(document.body).getPropertyValue(activeFont.cssVar).trim();
+      root.style.setProperty("--active-font", fontValue);
+    }
     const borderRgb = textColor === "#ffffff" ? "255, 255, 255" : "0, 0, 0";
     const borderVal = `1px solid rgba(${borderRgb}, ${borders / 100})`;
     root.style.setProperty("--border-color", `rgba(${borderRgb}, ${borders / 100})`);
@@ -117,7 +148,7 @@ export default function ControlPanel() {
     root.setAttribute("data-align", align);
     document.body.style.background = bg;
     document.body.style.color = textColor;
-  }, [bg, noise, noiseSpeed, marquee, waves, borders, align]);
+  }, [bg, noise, noiseSpeed, marquee, waves, borders, scanlines, font, align]);
 
   function randomize() {
     setBg(
@@ -129,6 +160,36 @@ export default function ControlPanel() {
     setNoiseSpeed(1 + Math.floor(Math.random() * 24));
     setWaves(Math.floor(Math.random() * 200));
     setBorders(5 + Math.floor(Math.random() * 45));
+    setScanlines(Math.random() > 0.5 ? Math.floor(Math.random() * 80) : 0);
+  }
+
+  function share() {
+    const params = new URLSearchParams({
+      bg, n: String(noise), ns: String(noiseSpeed), w: String(waves),
+      b: String(borders), sl: String(scanlines),
+      f: font, a: align,
+    });
+    const url = `${window.location.origin}${window.location.pathname}?${params}`;
+    const copyPromise = navigator.clipboard?.writeText(url) ?? new Promise<void>((resolve) => {
+      const textarea = document.createElement("textarea");
+      textarea.value = url;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      resolve();
+    });
+    copyPromise.then(() => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+      setToastMounted(true);
+      requestAnimationFrame(() => requestAnimationFrame(() => setToastVisible(true)));
+      toastTimer.current = setTimeout(() => {
+        setToastVisible(false);
+        toastTimer.current = setTimeout(() => setToastMounted(false), 350);
+      }, 2000);
+    });
   }
 
   function reset() {
@@ -137,11 +198,31 @@ export default function ControlPanel() {
     setNoiseSpeed(DEFAULTS.noiseSpeed);
     setWaves(DEFAULTS.waves);
     setBorders(DEFAULTS.borders);
+    setScanlines(DEFAULTS.scanlines);
+    setFont("inter");
     setAlign("left");
   }
 
   return (
     <>
+      {toastMounted && (
+        <div
+          className="fixed bottom-6 z-100 text-xs px-4 py-2 rounded-[4px]"
+          style={{
+            left: "50%",
+            marginLeft: "-110px",
+            width: 220,
+            textAlign: "center",
+            background: "var(--text-color)",
+            color: "var(--bg-color)",
+            transition: "opacity 0.35s, transform 0.35s",
+            opacity: toastVisible ? 1 : 0,
+            transform: toastVisible ? "translateY(0)" : "translateY(20px)",
+          }}
+        >
+          Link copied to clipboard
+        </div>
+      )}
       <button
         ref={btnRef}
         onClick={() => setOpen(!open)}
@@ -236,6 +317,14 @@ export default function ControlPanel() {
           </div>
 
           <Slider
+            label="Borders"
+            value={borders}
+            onChange={setBorders}
+            min={0}
+            max={100}
+            suffix="%"
+          />
+          <Slider
             label="Noise"
             value={noise}
             onChange={setNoise}
@@ -260,15 +349,38 @@ export default function ControlPanel() {
             suffix="%"
           />
           <Slider
-            label="Borders"
-            value={borders}
-            onChange={setBorders}
+            label="Scanlines"
+            value={scanlines}
+            onChange={setScanlines}
             min={0}
             max={100}
             suffix="%"
           />
 
-          <div className="mt-4 mb-4 hidden lg:block">
+          <div className="mt-4 mb-4">
+            <div className="mb-1.5">
+              <span>Typeface</span>
+            </div>
+            <div className="flex gap-2">
+              {FONTS.map((f) => (
+                <button
+                  key={f.name}
+                  onClick={() => setFont(f.name)}
+                  className={`flex-1 h-[34px] flex items-center justify-center ${font === f.name ? "" : "opacity-60"} hover:opacity-100 transition-opacity`}
+                  style={{
+                    border: `1px solid ${font === f.name ? textColor : "var(--border-color)"}`,
+                    borderRadius: 4,
+                    fontFamily: `var(${f.cssVar})`,
+                    fontSize: 13,
+                  }}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mb-4 hidden lg:block">
             <div className="mb-1.5">
               <span>Container</span>
             </div>
@@ -329,6 +441,17 @@ export default function ControlPanel() {
                 <path d="M3 3v5h5" />
               </svg>
               <span>Reset</span>
+            </button>
+            <button
+              onClick={share}
+              className="flex items-center justify-center py-2 px-3 rounded-[4px] opacity-60 hover:opacity-100 transition-opacity"
+              style={{ border: "1px solid var(--border-color)" }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                <polyline points="16 6 12 2 8 6" />
+                <line x1="12" y1="2" x2="12" y2="15" />
+              </svg>
             </button>
           </div>
         </div>

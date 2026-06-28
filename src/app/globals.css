@@ -21,8 +21,36 @@
 body {
   background: var(--bg-color);
   color: var(--text-color);
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--active-font, var(--font-inter)), system-ui, sans-serif;
   letter-spacing: -0.03em;
+}
+
+@keyframes toast-in {
+  0% { opacity: 0; transform: translateY(20px); }
+  9% { opacity: 0.44; transform: translateY(11.2px); }
+  17% { opacity: 0.69; transform: translateY(6.1px); }
+  26% { opacity: 0.83; transform: translateY(3.3px); }
+  34% { opacity: 0.91; transform: translateY(1.8px); }
+  43% { opacity: 0.95; transform: translateY(1px); }
+  52% { opacity: 0.97; transform: translateY(0.5px); }
+  69% { opacity: 0.99; transform: translateY(0.2px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toast-out {
+  0% { opacity: 1; transform: translateY(0); }
+  31% { opacity: 0.97; transform: translateY(0.5px); }
+  57% { opacity: 0.83; transform: translateY(3.3px); }
+  83% { opacity: 0.44; transform: translateY(11.2px); }
+  100% { opacity: 0; transform: translateY(20px); }
+}
+
+@keyframes scanline-flicker {
+  0% { opacity: 1; }
+  25% { opacity: 0.7; }
+  50% { opacity: 0.9; }
+  75% { opacity: 0.6; }
+  100% { opacity: 1; }
 }
 
 @keyframes marquee {

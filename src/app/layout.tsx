@@ -1,10 +1,26 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Bricolage_Grotesque, Archivo_Narrow, Inconsolata } from "next/font/google";
 import NoiseTexture from "./components/NoiseTexture";
+import ScanLines from "./components/ScanLines";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  subsets: ["latin"],
+});
+
+const archivo = Archivo_Narrow({
+  variable: "--font-archivo",
+  subsets: ["latin"],
+});
+
+const inconsolata = Inconsolata({
+  variable: "--font-inconsolata",
   subsets: ["latin"],
 });
 
@@ -21,8 +37,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased`}>
+      <body className={`${inter.variable} ${bricolage.variable} ${archivo.variable} ${inconsolata.variable} antialiased`}>
         <NoiseTexture />
+        <ScanLines />
         {children}
       </body>
     </html>
