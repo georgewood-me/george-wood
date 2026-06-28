@@ -71,6 +71,7 @@ function Slider({
 
 export default function ControlPanel() {
   const [open, setOpen] = useState(false);
+  const [panelVisible, setPanelVisible] = useState(false);
   const [bg, setBg] = useState(DEFAULTS.bg);
   const textColor = textColorForBg(bg);
   const [noise, setNoise] = useState(DEFAULTS.noise);
@@ -84,16 +85,25 @@ export default function ControlPanel() {
   const [toastMounted, setToastMounted] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [isMobile, setIsMobile] = useState(true);
   const panelRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    setIsDesktop(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
+    const mqDesktop = window.matchMedia("(min-width: 1024px)");
+    const mqMobile = window.matchMedia("(max-width: 767px)");
+    setIsDesktop(mqDesktop.matches);
+    setIsMobile(mqMobile.matches);
+    const onDesktop = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    const onMobile = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mqDesktop.addEventListener("change", onDesktop);
+    mqMobile.addEventListener("change", onMobile);
+    return () => {
+      mqDesktop.removeEventListener("change", onDesktop);
+      mqMobile.removeEventListener("change", onMobile);
+    };
   }, []);
 
   useEffect(() => {
@@ -108,6 +118,22 @@ export default function ControlPanel() {
     if (params.has("a")) setAlign(params.get("a") as "left" | "center" | "right");
   }, []);
 
+  function togglePanel() {
+    if (open) {
+      closePanel();
+    } else {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+      setOpen(true);
+      requestAnimationFrame(() => requestAnimationFrame(() => setPanelVisible(true)));
+    }
+  }
+
+  function closePanel() {
+    setPanelVisible(false);
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setOpen(false), 350);
+  }
+
   useEffect(() => {
     if (!open) return;
     function handleClick(e: MouseEvent) {
@@ -115,11 +141,18 @@ export default function ControlPanel() {
         panelRef.current?.contains(e.target as Node) ||
         btnRef.current?.contains(e.target as Node)
       ) return;
-      setOpen(false);
+      closePanel();
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
+
+  useEffect(() => {
+    if (open && isMobile) {
+      document.body.style.overflow = "hidden";
+      return () => { document.body.style.overflow = ""; };
+    }
+  }, [open, isMobile]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -138,8 +171,8 @@ export default function ControlPanel() {
       root.style.setProperty("--active-font", fontValue);
     }
     const borderRgb = textColor === "#ffffff" ? "255, 255, 255" : "0, 0, 0";
-    const borderVal = `1px solid rgba(${borderRgb}, ${borders / 100})`;
     root.style.setProperty("--border-color", `rgba(${borderRgb}, ${borders / 100})`);
+    const borderVal = `1px solid rgba(${borderRgb}, ${borders / 100})`;
     const ml = align === "left" ? "0px" : align === "center" ? "calc(50vw - 320px)" : "calc(100vw - 640px)";
     root.style.setProperty("--container-ml", ml);
     root.style.setProperty("--container-mr", "0");
@@ -203,6 +236,151 @@ export default function ControlPanel() {
     setAlign("left");
   }
 
+  const panelContent = (
+    <>
+      <div className="mb-4">
+        <div className="flex justify-between mb-1.5">
+          <span>Background</span>
+        </div>
+        <div className="grid grid-cols-9 gap-2.5">
+          {PRESETS.map((color) => (
+            <button
+              key={color}
+              onClick={() => setBg(color)}
+              className="aspect-square transition-transform hover:scale-110"
+              style={{
+                background: color,
+                borderRadius: 3,
+                border: "1px solid var(--border-color)",
+                boxShadow: `0 0 0 2px var(--bg-color), 0 0 0 3px ${bg === color ? textColor : "var(--border-color)"}`,
+              }}
+            />
+          ))}
+          <label
+            className="aspect-square cursor-pointer overflow-hidden flex items-center justify-center"
+            style={{
+              borderRadius: 3,
+              border: "1px solid var(--border-color)",
+              boxShadow: "0 0 0 2px var(--bg-color), 0 0 0 3px var(--border-color)",
+            }}
+          >
+            <input
+              type="color"
+              value={bg}
+              onChange={(e) => setBg(e.target.value)}
+              className="opacity-0 w-0 h-0 absolute"
+            />
+            <span className="text-lg leading-none opacity-60">+</span>
+          </label>
+        </div>
+      </div>
+
+      <Slider label="Borders" value={borders} onChange={setBorders} min={0} max={100} suffix="%" />
+      <Slider label="Noise" value={noise} onChange={setNoise} min={0} max={80} suffix="%" />
+      <Slider label="Noise speed" value={noiseSpeed} onChange={setNoiseSpeed} min={1} max={25} suffix="fps" />
+      <Slider label="Sound waves" value={waves} onChange={setWaves} min={0} max={200} suffix="%" />
+      <Slider label="Scanlines" value={scanlines} onChange={setScanlines} min={0} max={100} suffix="%" />
+
+      <div className="mt-4 mb-4">
+        <div className="mb-1.5">
+          <span>Typeface</span>
+        </div>
+        <div className="flex gap-2">
+          {FONTS.map((f) => (
+            <button
+              key={f.name}
+              onClick={() => setFont(f.name)}
+              className={`flex-1 h-[34px] flex items-center justify-center ${font === f.name ? "" : "opacity-60"} hover:opacity-100 transition-opacity`}
+              style={{
+                border: `1px solid ${font === f.name ? textColor : "var(--border-color)"}`,
+                borderRadius: 4,
+                fontFamily: `var(${f.cssVar})`,
+                fontSize: 13,
+              }}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-4 hidden lg:block">
+        <div className="mb-1.5">
+          <span>Container</span>
+        </div>
+        <div className="flex gap-2">
+          {(["left", "center", "right"] as const).map((option) => {
+            const highlight = option === "left" ? 0 : option === "center" ? 1 : 2;
+            return (
+              <button
+                key={option}
+                onClick={() => setAlign(option)}
+                className={`flex-1 h-[34px] flex items-center justify-center gap-[1.5px] ${align === option ? "" : "opacity-60"} hover:opacity-100 transition-opacity`}
+                style={{
+                  border: `1px solid ${align === option ? textColor : "var(--border-color)"}`,
+                  borderRadius: 4,
+                }}
+              >
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    style={{
+                      display: "block",
+                      width: 3,
+                      height: 10,
+                      borderRadius: 1,
+                      background: "currentColor",
+                      opacity: i === highlight ? 1 : 0.25,
+                    }}
+                  />
+                ))}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="pt-4 -mx-4 px-4 lg:-mx-4 lg:px-4 flex gap-2" style={{ borderTop: "1px solid var(--border-color)" }}>
+        <button
+          onClick={randomize}
+          className="flex-1 h-[34px] flex items-center justify-center gap-1.5 rounded-[4px] opacity-60 hover:opacity-100 transition-opacity"
+          style={{ border: "1px solid var(--border-color)" }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M16 3h5v5" />
+            <path d="M4 20L21 3" />
+            <path d="M21 16v5h-5" />
+            <path d="M15 15l6 6" />
+            <path d="M4 4l5 5" />
+          </svg>
+          <span>Random</span>
+        </button>
+        <button
+          onClick={reset}
+          className="flex-1 h-[34px] flex items-center justify-center gap-1.5 rounded-[4px] opacity-60 hover:opacity-100 transition-opacity"
+          style={{ border: "1px solid var(--border-color)" }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+          </svg>
+          <span>Reset</span>
+        </button>
+        <button
+          onClick={share}
+          className="h-[34px] flex items-center justify-center px-3 rounded-[4px] opacity-60 hover:opacity-100 transition-opacity"
+          style={{ border: "1px solid var(--border-color)" }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+            <polyline points="16 6 12 2 8 6" />
+            <line x1="12" y1="2" x2="12" y2="15" />
+          </svg>
+        </button>
+      </div>
+    </>
+  );
+
   return (
     <>
       {toastMounted && (
@@ -223,16 +401,18 @@ export default function ControlPanel() {
           Link copied to clipboard
         </div>
       )}
+
       <button
         ref={btnRef}
-        onClick={() => setOpen(!open)}
-        className="fixed top-[24px] right-[16px] w-[32px] h-[32px] rounded-[4px] lg:top-[34px] lg:w-[40px] lg:h-[40px] z-40 flex items-center justify-center hover:opacity-100 transition-opacity control-btn-glow"
+        onClick={togglePanel}
+        className="fixed top-[24px] right-[16px] w-[32px] h-[32px] rounded-[4px] lg:top-[34px] lg:w-[40px] lg:h-[40px] z-70 flex items-center justify-center hover:opacity-100 transition-opacity control-btn-glow"
         style={{
-          border: "1px solid var(--border-color)",
-          background: "var(--bg-color-translucent)",
+          border: "1px solid rgba(255,255,255,0.5)",
+          background: "linear-gradient(160deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 100%)",
           color: "var(--text-color)",
-          WebkitBackdropFilter: "blur(1px)",
-          backdropFilter: "blur(1px)",
+          WebkitBackdropFilter: "blur(8px)",
+          backdropFilter: "blur(8px)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.6)",
           ...(isDesktop ? {
             left: align === "left" ? 584 : align === "center" ? "calc(50vw + 264px)" : "calc(100vw - 56px)",
             right: "auto",
@@ -259,202 +439,66 @@ export default function ControlPanel() {
       </button>
 
       {open && (
-        <div
-          ref={panelRef}
-          className="fixed top-[64px] right-[16px] lg:top-[82px] z-60 w-[260px] p-4 text-xs rounded-[4px] control-btn-glow"
-          style={{
-            border: "1px solid var(--border-color)",
-            background: "var(--bg-color)",
-            color: "var(--text-color)",
-            ...(isDesktop ? {
-              left: align === "left" ? 364 : align === "center" ? "calc(50vw + 44px)" : "calc(100vw - 276px)",
-              right: "auto",
-              transition: "left 0.4s ease",
-            } : {}),
-          }}
-        >
-          <div className="mb-4">
-            <span
-              className="font-medium text-xs"
-              style={{ letterSpacing: "0.04em" }}
-            >
-              CONTROLS
-            </span>
-          </div>
+        <>
+          {isMobile && (
+            <div
+              className="fixed inset-0 z-50"
+              style={{
+                background: "rgba(0, 0, 0, 0.5)",
+                transition: "opacity 0.35s",
+                opacity: panelVisible ? 1 : 0,
+              }}
+              onClick={closePanel}
+            />
+          )}
 
-          <div className="mb-4">
-            <div className="flex justify-between mb-1.5">
-              <span>Background</span>
+          <div
+            ref={panelRef}
+            className={
+              isMobile
+                ? "fixed bottom-0 left-0 right-0 z-60 px-5 pt-2 pb-8 text-xs"
+                : "fixed z-60 w-[350px] p-4 text-xs rounded-[4px] control-btn-glow"
+            }
+            style={{
+              background: "var(--bg-color)",
+              color: "var(--text-color)",
+              transition: isMobile
+                ? "opacity 0.35s, transform 0.35s"
+                : "opacity 0.35s, transform 0.35s, left 0.4s ease",
+              opacity: panelVisible ? 1 : 0,
+              transform: panelVisible
+                ? "translateY(0)"
+                : isMobile
+                  ? "translateY(100%)"
+                  : "translateY(8px)",
+              ...(isMobile
+                ? {
+                    borderTop: "1px solid var(--border-color)",
+                    borderRadius: "12px 12px 0 0",
+                    maxHeight: "85vh",
+                    overflowY: "auto" as const,
+                  }
+                : {
+                    border: "1px solid var(--border-color)",
+                    top: isDesktop ? 82 : 64,
+                    right: isDesktop ? "auto" : 16,
+                    ...(isDesktop
+                      ? {
+                          left: align === "left" ? 274 : align === "center" ? "calc(50vw - 46px)" : "calc(100vw - 366px)",
+                        }
+                      : {}),
+                  }),
+            }}
+          >
+            <div className={isMobile ? "mb-4 mt-2" : "mb-4"}>
+              <span className="font-medium text-xs" style={{ letterSpacing: "0.04em" }}>
+                CONTROLS
+              </span>
             </div>
-            <div className="flex gap-1 items-center">
-              {PRESETS.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => setBg(color)}
-                  className="flex-1 aspect-square transition-transform hover:scale-110"
-                  style={{
-                    background: color,
-                    borderRadius: 2,
-                    border: `1px solid ${bg === color ? textColor : "var(--border-color)"}`,
-                  }}
-                />
-              ))}
-              <label
-                className="flex-1 aspect-square cursor-pointer overflow-hidden"
-                style={{ border: "1px solid var(--border-color)", borderRadius: "50%" }}
-              >
-                <input
-                  type="color"
-                  value={bg}
-                  onChange={(e) => setBg(e.target.value)}
-                  className="opacity-0 w-0 h-0 absolute"
-                />
-                <span className="w-full h-full flex items-center justify-center text-base leading-none opacity-60" style={{ marginTop: -1 }}>
-                  +
-                </span>
-              </label>
-            </div>
-          </div>
 
-          <Slider
-            label="Borders"
-            value={borders}
-            onChange={setBorders}
-            min={0}
-            max={100}
-            suffix="%"
-          />
-          <Slider
-            label="Noise"
-            value={noise}
-            onChange={setNoise}
-            min={0}
-            max={80}
-            suffix="%"
-          />
-          <Slider
-            label="Noise speed"
-            value={noiseSpeed}
-            onChange={setNoiseSpeed}
-            min={1}
-            max={25}
-            suffix="fps"
-          />
-          <Slider
-            label="Sound waves"
-            value={waves}
-            onChange={setWaves}
-            min={0}
-            max={200}
-            suffix="%"
-          />
-          <Slider
-            label="Scanlines"
-            value={scanlines}
-            onChange={setScanlines}
-            min={0}
-            max={100}
-            suffix="%"
-          />
-
-          <div className="mt-4 mb-4">
-            <div className="mb-1.5">
-              <span>Typeface</span>
-            </div>
-            <div className="flex gap-2">
-              {FONTS.map((f) => (
-                <button
-                  key={f.name}
-                  onClick={() => setFont(f.name)}
-                  className={`flex-1 h-[34px] flex items-center justify-center ${font === f.name ? "" : "opacity-60"} hover:opacity-100 transition-opacity`}
-                  style={{
-                    border: `1px solid ${font === f.name ? textColor : "var(--border-color)"}`,
-                    borderRadius: 4,
-                    fontFamily: `var(${f.cssVar})`,
-                    fontSize: 13,
-                  }}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
+            {panelContent}
           </div>
-
-          <div className="mb-4 hidden lg:block">
-            <div className="mb-1.5">
-              <span>Container</span>
-            </div>
-            <div className="flex gap-2">
-              {(["left", "center", "right"] as const).map((option) => {
-                const highlight = option === "left" ? 0 : option === "center" ? 1 : 2;
-                return (
-                  <button
-                    key={option}
-                    onClick={() => setAlign(option)}
-                    className={`flex-1 h-[34px] flex items-center justify-center gap-[1.5px] ${align === option ? "" : "opacity-60"} hover:opacity-100 transition-opacity`}
-                    style={{
-                      border: `1px solid ${align === option ? textColor : "var(--border-color)"}`,
-                      borderRadius: 4,
-                    }}
-                  >
-                    {[0, 1, 2].map((i) => (
-                      <span
-                        key={i}
-                        style={{
-                          display: "block",
-                          width: 3,
-                          height: 10,
-                          borderRadius: 1,
-                          background: "currentColor",
-                          opacity: i === highlight ? 1 : 0.25,
-                        }}
-                      />
-                    ))}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="pt-4 -mx-4 px-4 flex gap-2" style={{ borderTop: "1px solid var(--border-color)" }}>
-            <button
-              onClick={randomize}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[4px] opacity-60 hover:opacity-100 transition-opacity"
-              style={{ border: "1px solid var(--border-color)" }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 3h5v5" />
-                <path d="M4 20L21 3" />
-                <path d="M21 16v5h-5" />
-                <path d="M15 15l6 6" />
-                <path d="M4 4l5 5" />
-              </svg>
-              <span>Random</span>
-            </button>
-            <button
-              onClick={reset}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[4px] opacity-60 hover:opacity-100 transition-opacity"
-              style={{ border: "1px solid var(--border-color)" }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                <path d="M3 3v5h5" />
-              </svg>
-              <span>Reset</span>
-            </button>
-            <button
-              onClick={share}
-              className="flex items-center justify-center py-2 px-3 rounded-[4px] opacity-60 hover:opacity-100 transition-opacity"
-              style={{ border: "1px solid var(--border-color)" }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                <polyline points="16 6 12 2 8 6" />
-                <line x1="12" y1="2" x2="12" y2="15" />
-              </svg>
-            </button>
-          </div>
-        </div>
+        </>
       )}
     </>
   );

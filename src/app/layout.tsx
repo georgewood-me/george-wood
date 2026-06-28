@@ -36,8 +36,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${bricolage.variable} ${archivo.variable} ${inconsolata.variable} antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning className={`${inter.variable} ${bricolage.variable} ${archivo.variable} ${inconsolata.variable} antialiased`}>
         <NoiseTexture />
         <ScanLines />
         {children}
