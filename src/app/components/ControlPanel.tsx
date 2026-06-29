@@ -6,9 +6,9 @@ const PRESETS = ["#0038FF", "#000000", "#FFFFFF", "#E50000", "#E28C00", "#06CA1D
 
 const FONTS = [
   { label: "Aa", cssVar: "--font-inter", name: "inter" },
-  { label: "Aa", cssVar: "--font-aujournuit", name: "aujournuit" },
-  { label: "Aa", cssVar: "--font-necto-mono", name: "necto-mono" },
-  { label: "Aa", cssVar: "--font-absans", name: "absans" },
+  { label: "Aa", cssVar: "--font-bricolage", name: "bricolage" },
+  { label: "Aa", cssVar: "--font-archivo", name: "archivo" },
+  { label: "Aa", cssVar: "--font-inconsolata", name: "inconsolata" },
 ] as const;
 
 const DEFAULTS = {
