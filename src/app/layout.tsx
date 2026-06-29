@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Inter, Bricolage_Grotesque, Archivo_Narrow, Inconsolata } from "next/font/google";
+import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import NoiseTexture from "./components/NoiseTexture";
 import ScanLines from "./components/ScanLines";
 import CursorTrail from "./components/CursorTrail";
@@ -10,19 +11,22 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const bricolage = Bricolage_Grotesque({
-  variable: "--font-bricolage",
-  subsets: ["latin"],
+const aujournuit = localFont({
+  src: "../../public/fonts/Aujournuit-Regular.woff2",
+  variable: "--font-aujournuit",
+  display: "swap",
 });
 
-const archivo = Archivo_Narrow({
-  variable: "--font-archivo",
-  subsets: ["latin"],
+const nectoMono = localFont({
+  src: "../../public/fonts/NectoMono-Regular.woff2",
+  variable: "--font-necto-mono",
+  display: "swap",
 });
 
-const inconsolata = Inconsolata({
-  variable: "--font-inconsolata",
-  subsets: ["latin"],
+const absans = localFont({
+  src: "../../public/fonts/Absans-Regular.woff2",
+  variable: "--font-absans",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -38,7 +42,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning className={`${inter.variable} ${bricolage.variable} ${archivo.variable} ${inconsolata.variable} antialiased`}>
+      <body suppressHydrationWarning className={`${inter.variable} ${aujournuit.variable} ${nectoMono.variable} ${absans.variable} antialiased`}>
         <NoiseTexture />
         <ScanLines />
         <CursorTrail />
