@@ -87,6 +87,7 @@ export default function ControlPanel() {
   const [gloss, setGloss] = useState(false);
   const [toastMounted, setToastMounted] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -226,15 +227,18 @@ export default function ControlPanel() {
       document.body.removeChild(textarea);
       resolve();
     });
-    copyPromise.then(() => {
-      if (toastTimer.current) clearTimeout(toastTimer.current);
-      setToastMounted(true);
-      requestAnimationFrame(() => requestAnimationFrame(() => setToastVisible(true)));
-      toastTimer.current = setTimeout(() => {
-        setToastVisible(false);
-        toastTimer.current = setTimeout(() => setToastMounted(false), 350);
-      }, 2000);
-    });
+    copyPromise.then(() => showToast("Link copied to clipboard"));
+  }
+
+  function showToast(message: string) {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToastMessage(message);
+    setToastMounted(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => setToastVisible(true)));
+    toastTimer.current = setTimeout(() => {
+      setToastVisible(false);
+      toastTimer.current = setTimeout(() => setToastMounted(false), 350);
+    }, 2000);
   }
 
   function reset() {
@@ -385,7 +389,7 @@ export default function ControlPanel() {
           </button>
         )}
         <button
-          onClick={closePanel}
+          onClick={() => { closePanel(); showToast("Settings saved"); }}
           className="glass-btn h-[34px] flex items-center justify-center px-3 rounded-[4px] opacity-60 hover:opacity-100"
           style={{ borderRadius: 4 }}
         >
@@ -430,7 +434,7 @@ export default function ControlPanel() {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 6L9 17l-5-5" />
           </svg>
-          Link copied to clipboard
+          {toastMessage}
         </div>
       )}
 
