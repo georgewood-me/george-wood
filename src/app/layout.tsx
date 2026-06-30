@@ -3,6 +3,7 @@ import { Inter, Bricolage_Grotesque, Archivo_Narrow, Inconsolata } from "next/fo
 import NoiseTexture from "./components/NoiseTexture";
 import ScanLines from "./components/ScanLines";
 import CursorTrail from "./components/CursorTrail";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -43,6 +44,7 @@ export default function RootLayout({
         <ScanLines />
         <CursorTrail />
         {children}
+        <GoogleAnalytics gaId="G-FMZ2ERBWLZ" />
       </body>
     </html>
   );
