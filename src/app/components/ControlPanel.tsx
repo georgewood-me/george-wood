@@ -418,17 +418,15 @@ export default function ControlPanel() {
     <>
       {toastMounted && (
         <div
-          className="fixed bottom-6 z-100 text-xs px-4 py-2 rounded-[4px] flex items-center justify-center gap-2"
+          className="fixed bottom-6 z-100 text-xs pl-3 pr-4 py-2 rounded-[4px] flex items-center justify-center gap-2 whitespace-nowrap"
           style={{
             left: "50%",
-            marginLeft: "-110px",
-            width: 220,
             background: "var(--text-color)",
             color: "var(--bg-color)",
             boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
             transition: "opacity 0.35s, transform 0.35s",
             opacity: toastVisible ? 1 : 0,
-            transform: toastVisible ? "translateY(0)" : "translateY(20px)",
+            transform: toastVisible ? "translateX(-50%)" : "translateX(-50%) translateY(20px)",
           }}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
