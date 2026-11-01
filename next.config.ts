@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    // The on-disk dev cache kept serving stale globals.css after edits
+    turbopackFileSystemCacheForDev: false,
+  },
 };
 
 export default nextConfig;

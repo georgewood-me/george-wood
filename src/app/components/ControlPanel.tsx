@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 
-const PRESETS = ["#0038FF", "#000000", "#FFFFFF", "#E50000", "#E28C00", "#06CA1D", "#06BDCA", "#CA06CA"];
+export const PRESETS = ["#0038FF", "#000000", "#FFFFFF", "#E50000", "#E28C00", "#06CA1D", "#06BDCA", "#CA06CA"];
 
 const FONTS = [
   { label: "Aa", cssVar: "--font-inter", name: "inter" },
@@ -11,10 +11,17 @@ const FONTS = [
   { label: "Aa", cssVar: "--font-inconsolata", name: "inconsolata" },
 ] as const;
 
+type Finish = "flat" | "glass";
+
+const FINISHES: { name: Finish; label: string; param: string }[] = [
+  { name: "flat", label: "Flat", param: "0" },
+  { name: "glass", label: "Frosted", param: "1" },
+];
+
 const DEFAULTS = {
   bg: "#0038FF",
   noise: 20,
-  noiseSpeed: 5,
+  noiseSpeed: 0,
   marquee: 20,
   waves: 100,
   borders: 20,
@@ -70,7 +77,7 @@ function Slider({
   );
 }
 
-export default function ControlPanel() {
+export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: { containerWidth?: number; desktopTop?: number }) {
   const [open, setOpen] = useState(false);
   const [panelVisible, setPanelVisible] = useState(false);
   const [bg, setBg] = useState(DEFAULTS.bg);
@@ -84,7 +91,9 @@ export default function ControlPanel() {
   const [cursorTrail, setCursorTrail] = useState(DEFAULTS.cursorTrail);
   const [font, setFont] = useState("inter");
   const [align, setAlign] = useState<"left" | "center" | "right">("left");
-  const [gloss, setGloss] = useState(false);
+  const [finish, setFinish] = useState<Finish>("flat");
+  const gloss = finish === "glass";
+  const flat = finish === "flat";
   const [toastMounted, setToastMounted] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -121,18 +130,33 @@ export default function ControlPanel() {
     if (params.has("ct")) setCursorTrail(Number(params.get("ct")));
     if (params.has("f")) setFont(params.get("f")!);
     if (params.has("a")) setAlign(params.get("a") as "left" | "center" | "right");
-    if (params.has("g")) setGloss(params.get("g") === "1");
+    if (params.has("g")) setFinish(FINISHES.find((f) => f.param === params.get("g"))?.name ?? "flat");
   }, []);
+
+  function openPanel() {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setOpen(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => setPanelVisible(true)));
+  }
 
   function togglePanel() {
     if (open) {
       closePanel();
     } else {
-      if (closeTimer.current) clearTimeout(closeTimer.current);
-      setOpen(true);
-      requestAnimationFrame(() => requestAnimationFrame(() => setPanelVisible(true)));
+      openPanel();
     }
   }
+
+  // Lets other parts of the page (like the bento's "Make it yours" tile) drive the panel
+  useEffect(() => {
+    const onSetBg = (e: Event) => setBg((e as CustomEvent<string>).detail);
+    window.addEventListener("controls:set-bg", onSetBg);
+    window.addEventListener("controls:open", openPanel);
+    return () => {
+      window.removeEventListener("controls:set-bg", onSetBg);
+      window.removeEventListener("controls:open", openPanel);
+    };
+  }, []);
 
   function closePanel() {
     setPanelVisible(false);
@@ -185,7 +209,8 @@ export default function ControlPanel() {
     const borderRgb = textColor === "#ffffff" ? "255, 255, 255" : "0, 0, 0";
     root.style.setProperty("--border-color", `rgba(${borderRgb}, ${borders / 100})`);
     const borderVal = `1px solid rgba(${borderRgb}, ${borders / 100})`;
-    const ml = align === "left" ? "0px" : align === "center" ? "calc(50vw - 320px)" : "calc(100vw - 640px)";
+    const half = containerWidth / 2;
+    const ml = align === "left" ? "0px" : align === "center" ? `max(0px, calc(50vw - ${half}px))` : `max(0px, calc(100vw - ${containerWidth}px))`;
     root.style.setProperty("--container-ml", ml);
     root.style.setProperty("--container-mr", "0");
     root.style.setProperty("--container-bl", align === "left" ? "none" : borderVal);
@@ -194,7 +219,9 @@ export default function ControlPanel() {
     root.setAttribute("data-gloss", String(gloss));
     document.body.style.background = bg;
     document.body.style.color = textColor;
-  }, [bg, noise, noiseSpeed, marquee, waves, borders, scanlines, cursorTrail, font, align, gloss]);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", bg);
+    window.dispatchEvent(new CustomEvent("controls:change", { detail: { bg } }));
+  }, [bg, noise, noiseSpeed, marquee, waves, borders, scanlines, cursorTrail, font, align, finish, containerWidth]);
 
   function randomize() {
     setBg(
@@ -213,7 +240,7 @@ export default function ControlPanel() {
     const params = new URLSearchParams({
       bg, n: String(noise), ns: String(noiseSpeed), w: String(waves),
       b: String(borders), sl: String(scanlines), ct: String(cursorTrail),
-      f: font, a: align, g: gloss ? "1" : "0",
+      f: font, a: align, g: FINISHES.find((f) => f.name === finish)!.param,
     });
     const url = `${window.location.origin}${window.location.pathname}?${params}`;
     const copyPromise = navigator.clipboard?.writeText(url) ?? new Promise<void>((resolve) => {
@@ -251,7 +278,7 @@ export default function ControlPanel() {
     setCursorTrail(DEFAULTS.cursorTrail);
     setFont("inter");
     setAlign("left");
-    setGloss(false);
+    setFinish("flat");
   }
 
   const panelContent = (
@@ -265,7 +292,8 @@ export default function ControlPanel() {
             <button
               key={color}
               onClick={() => setBg(color)}
-              className="glass-swatch aspect-square transition-transform hover:scale-110"
+              aria-pressed={bg === color}
+              className="glass-swatch aspect-square transition-opacity hover:opacity-80"
               style={{
                 background: color,
                 borderRadius: 3,
@@ -291,7 +319,7 @@ export default function ControlPanel() {
 
       <Slider label="Borders" value={borders} onChange={setBorders} min={0} max={100} suffix="%" />
       <Slider label="Noise" value={noise} onChange={setNoise} min={0} max={80} suffix="%" />
-      <Slider label="Noise speed" value={noiseSpeed} onChange={setNoiseSpeed} min={1} max={25} suffix="fps" />
+      <Slider label="Noise speed" value={noiseSpeed} onChange={setNoiseSpeed} min={0} max={25} suffix="fps" />
       <Slider label="Sound waves" value={waves} onChange={setWaves} min={0} max={200} suffix="%" />
       <Slider label="Scanlines" value={scanlines} onChange={setScanlines} min={0} max={100} suffix="%" />
 
@@ -304,6 +332,7 @@ export default function ControlPanel() {
             <button
               key={f.name}
               onClick={() => setFont(f.name)}
+              aria-pressed={font === f.name}
               className={`glass-btn flex-1 h-9 flex items-center justify-center ${font === f.name ? "" : "opacity-60"} hover:opacity-100`}
               style={{
                 borderRadius: 4,
@@ -329,6 +358,7 @@ export default function ControlPanel() {
               <button
                 key={option}
                 onClick={() => setAlign(option)}
+                aria-pressed={align === option}
                 className={`glass-btn flex-1 h-9 flex items-center justify-center gap-[1.5px] ${align === option ? "" : "opacity-60"} hover:opacity-100`}
                 style={{ borderRadius: 4, ...(align === option ? { border: "1px solid color-mix(in srgb, var(--text-color) 60%, transparent)" } : {}) }}
               >
@@ -443,21 +473,16 @@ export default function ControlPanel() {
       <button
         ref={btnRef}
         onClick={togglePanel}
-        className="fixed top-[24px] right-[16px] w-[32px] h-[32px] rounded-[4px] lg:top-[34px] lg:w-[40px] lg:h-[40px] z-70 flex items-center justify-center hover:opacity-100 transition-opacity control-btn-glow"
+        className="glass-surface fixed top-[20px] right-[16px] w-[40px] h-[40px] rounded-[4px] z-70 flex items-center justify-center hover:opacity-100 transition-opacity"
         style={{
           color: "var(--text-color)",
-          ...(gloss ? {
-            border: "1px solid rgba(255,255,255,0.3)",
-            background: "linear-gradient(-75deg, rgba(255,255,255,0.05), rgba(255,255,255,0.2), rgba(255,255,255,0.05))",
-            WebkitBackdropFilter: "blur(2px)",
-            backdropFilter: "blur(2px)",
-            boxShadow: "inset 0 1px 1px rgba(0,0,0,0.05), inset 0 -1px 1px rgba(255,255,255,0.4), 0 3px 2px -1px rgba(0,0,0,0.15), inset 0 0 1px 2px rgba(255,255,255,0.15)",
-          } : {
+          ...(!flat ? {} : {
             border: "1px solid var(--border-color)",
             background: "var(--bg-color)",
           }),
           ...(isDesktop ? {
-            left: align === "left" ? 584 : align === "center" ? "calc(50vw + 264px)" : "calc(100vw - 56px)",
+            left: align === "left" ? `min(${containerWidth - 56}px, calc(100vw - 56px))` : align === "center" ? `calc(min(50vw + ${containerWidth / 2}px, 100vw) - 56px)` : "calc(100vw - 56px)",
+            top: desktopTop,
             right: "auto",
             transition: "left 0.4s ease",
           } : {}),
@@ -474,9 +499,9 @@ export default function ControlPanel() {
             <line x1="4" y1="21" x2="4" y2="3" />
             <line x1="12" y1="21" x2="12" y2="3" />
             <line x1="20" y1="21" x2="20" y2="3" />
-            <line x1="1" y1="14" x2="7" y2="14" className="slider-bob-1" />
-            <line x1="9" y1="8" x2="15" y2="8" className="slider-bob-2" />
-            <line x1="17" y1="16" x2="23" y2="16" className="slider-bob-3" />
+            <line x1="1" y1="14" x2="7" y2="14" />
+            <line x1="9" y1="8" x2="15" y2="8" />
+            <line x1="17" y1="16" x2="23" y2="16" />
           </svg>
         )}
       </button>
@@ -487,7 +512,7 @@ export default function ControlPanel() {
             <div
               className="fixed inset-0 z-50"
               style={{
-                background: "rgba(0, 0, 0, 0.5)",
+                background: gloss ? "rgba(0, 0, 0, 0.15)" : "rgba(0, 0, 0, 0.5)",
                 transition: "opacity 0.35s",
                 opacity: panelVisible ? 1 : 0,
               }}
@@ -499,17 +524,12 @@ export default function ControlPanel() {
             ref={panelRef}
             className={
               isMobile
-                ? "fixed bottom-0 left-0 right-0 z-60 px-5 pt-2 pb-8 text-xs"
-                : "fixed z-60 w-[350px] p-4 text-xs rounded-[4px]"
+                ? "glass-surface fixed bottom-0 left-0 right-0 z-60 px-5 pt-2 pb-8 text-xs"
+                : "glass-surface fixed z-60 w-[350px] p-4 text-xs rounded-[4px]"
             }
             style={{
-              backgroundColor: "var(--bg-color)",
               color: "var(--text-color)",
-              ...(gloss ? {
-                backgroundImage: "linear-gradient(-75deg, rgba(255,255,255,0.03), rgba(255,255,255,0.12), rgba(255,255,255,0.03))",
-                WebkitBackdropFilter: "blur(12px)",
-                backdropFilter: "blur(12px)",
-              } : {}),
+              ...(!flat ? {} : { backgroundColor: "var(--bg-color)" }),
               transition: isMobile
                 ? "opacity 0.35s, transform 0.35s"
                 : "opacity 0.35s, transform 0.35s, left 0.4s ease",
@@ -521,48 +541,39 @@ export default function ControlPanel() {
                   : "translateY(8px)",
               ...(isMobile
                 ? {
-                    borderTop: "1px solid var(--border-color)",
+                    ...(!flat ? {} : { borderTop: "1px solid var(--border-color)" }),
                     borderRadius: "12px 12px 0 0",
                     maxHeight: "85vh",
                     overflowY: "auto" as const,
                   }
                 : {
-                    border: "1px solid var(--border-color)",
-                    top: isDesktop ? 82 : 64,
+                    ...(!flat ? {} : { border: "1px solid var(--border-color)" }),
+                    top: isDesktop ? desktopTop + 48 : 68,
                     right: isDesktop ? "auto" : 16,
                     ...(isDesktop
                       ? {
-                          left: align === "left" ? 274 : align === "center" ? "calc(50vw - 46px)" : "calc(100vw - 366px)",
+                          left: align === "left" ? `min(${containerWidth - 366}px, calc(100vw - 366px))` : align === "center" ? `calc(min(50vw + ${containerWidth / 2}px, 100vw) - 366px)` : "calc(100vw - 366px)",
                         }
                       : {}),
                   }),
             }}
           >
             <div className={`${isMobile ? "mb-4 mt-2" : "mb-4"} flex items-center justify-between`}>
-              <span className="font-medium text-xs" style={{ letterSpacing: "0.04em" }}>
-                CONTROLS
+              <span className="font-medium text-xs">
+                Controls
               </span>
               <div className="flex gap-1.5">
-                <button
-                  onClick={() => setGloss(false)}
-                  className={`text-xs px-2.5 py-1 rounded-[4px] ${gloss ? "glass-btn opacity-60 hover:opacity-100" : ""}`}
-                  style={!gloss
-                    ? { border: `1px solid color-mix(in srgb, var(--text-color) 60%, transparent)` }
-                    : {}
-                  }
-                >
-                  Flat
-                </button>
-                <button
-                  onClick={() => setGloss(true)}
-                  className={`text-xs px-2.5 py-1 rounded-[4px] ${gloss ? "glass-btn" : ""}`}
-                  style={gloss
-                    ? { border: `1px solid color-mix(in srgb, var(--text-color) 60%, transparent)` }
-                    : { border: "1px solid var(--border-color)", opacity: 0.5 }
-                  }
-                >
-                  Gloss
-                </button>
+                {FINISHES.map((f) => (
+                  <button
+                    key={f.name}
+                    onClick={() => setFinish(f.name)}
+                    aria-pressed={finish === f.name}
+                    className={`glass-btn text-xs px-2.5 py-1 rounded-[4px] ${finish === f.name ? "" : "opacity-60 hover:opacity-100"}`}
+                    style={finish === f.name ? { border: `1px solid color-mix(in srgb, var(--text-color) 60%, transparent)` } : {}}
+                  >
+                    {f.label}
+                  </button>
+                ))}
               </div>
             </div>
 

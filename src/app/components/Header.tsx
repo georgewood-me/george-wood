@@ -104,7 +104,7 @@ function CloudLightning() {
   );
 }
 
-type WeatherType = "sun" | "cloud-sun" | "cloud" | "fog" | "drizzle" | "rain" | "snow" | "snowflake" | "thunder";
+export type WeatherType = "sun" | "cloud-sun" | "cloud" | "fog" | "drizzle" | "rain" | "snow" | "snowflake" | "thunder";
 
 const WEATHER_MAP: Record<number, WeatherType> = {
   0: "sun", 1: "cloud-sun", 2: "cloud-sun", 3: "cloud",
@@ -114,7 +114,7 @@ const WEATHER_MAP: Record<number, WeatherType> = {
   85: "snow", 86: "snow", 95: "thunder", 96: "thunder", 99: "thunder",
 };
 
-const WEATHER_ICONS: Record<WeatherType, () => ReactNode> = {
+export const WEATHER_ICONS: Record<WeatherType, () => ReactNode> = {
   sun: Sun,
   "cloud-sun": CloudSun,
   cloud: Cloud,
@@ -126,7 +126,7 @@ const WEATHER_ICONS: Record<WeatherType, () => ReactNode> = {
   thunder: CloudLightning,
 };
 
-export default function Header() {
+export function useNottingham() {
   const [time, setTime] = useState("");
   const [weather, setWeather] = useState<{ temp: number; type: WeatherType } | null>(null);
 
@@ -163,6 +163,12 @@ export default function Header() {
     const interval = setInterval(fetchWeather, 10 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
+
+  return { time, weather };
+}
+
+export default function Header() {
+  const { time, weather } = useNottingham();
 
   return (
     <header className="flex items-end sm:items-center justify-between py-6">

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Bricolage_Grotesque, Archivo_Narrow, Inconsolata } from "next/font/google";
 import NoiseTexture from "./components/NoiseTexture";
 import ScanLines from "./components/ScanLines";
@@ -30,6 +30,10 @@ export const metadata: Metadata = {
   title: "George Wood • Product Designer",
   description: "Digital & Product Designer based in Nottingham • George Wood",
   icons: { icon: "/icon.png" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0038FF",
 };
 
 export default function RootLayout({

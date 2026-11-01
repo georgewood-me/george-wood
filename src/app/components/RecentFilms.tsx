@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-interface Film {
+export interface Film {
   title: string;
   year: string;
   rating: number;
@@ -10,7 +10,7 @@ interface Film {
   url: string;
 }
 
-function Stars({ rating }: { rating: number }) {
+export function Stars({ rating }: { rating: number }) {
   const full = Math.floor(rating);
   const half = rating % 1 >= 0.5;
   return (
@@ -32,7 +32,7 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
-export default function RecentFilms() {
+export function useRecentFilms() {
   const [films, setFilms] = useState<Film[]>([]);
   useEffect(() => {
     fetch("/api/letterboxd")
@@ -40,6 +40,44 @@ export default function RecentFilms() {
       .then((data: Film[]) => setFilms(data))
       .catch(() => {});
   }, []);
+  return films;
+}
+
+export function FilmCard({ film }: { film: Film }) {
+  return (
+    <a href={film.url} target="_blank" rel="noopener noreferrer" className="group">
+      <div
+        className="glass-poster aspect-2/3 rounded-[4px] overflow-hidden mb-2 relative"
+        style={{ border: "1px solid var(--border-color)" }}
+      >
+        <img src={film.poster} alt={film.title} className="w-full h-full object-cover absolute inset-0" />
+        <div
+          className="absolute inset-0 transition-opacity duration-500 group-hover:opacity-0"
+          style={{ background: "var(--duotone-highlight)" }}
+        >
+          <img
+            src={film.poster}
+            alt=""
+            className="w-full h-full object-cover"
+            style={{ filter: "grayscale(1) contrast(1.1)", mixBlendMode: "multiply" }}
+          />
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: "var(--duotone-shadow)", mixBlendMode: "lighten" }}
+          />
+        </div>
+      </div>
+      <p className="text-xs font-medium truncate">{film.title}</p>
+      <div className="flex items-center gap-1.5 mt-0.5">
+        <span className="text-xs opacity-50 tabular-nums">{film.year}</span>
+        {film.rating > 0 && <Stars rating={film.rating} />}
+      </div>
+    </a>
+  );
+}
+
+export default function RecentFilms() {
+  const films = useRecentFilms();
 
   if (films.length === 0) return null;
 
@@ -58,44 +96,7 @@ export default function RecentFilms() {
       </div>
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
         {films.map((film) => (
-          <a
-            key={film.url}
-            href={film.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group"
-          >
-            <div
-              className="glass-poster aspect-2/3 rounded-[4px] overflow-hidden mb-2 relative"
-              style={{ border: "1px solid var(--border-color)" }}
-            >
-              <img
-                src={film.poster}
-                alt={film.title}
-                className="w-full h-full object-cover absolute inset-0"
-              />
-              <div
-                className="absolute inset-0 transition-opacity duration-500 group-hover:opacity-0"
-                style={{ background: "var(--duotone-highlight)" }}
-              >
-                <img
-                  src={film.poster}
-                  alt=""
-                  className="w-full h-full object-cover"
-                  style={{ filter: "grayscale(1) contrast(1.1)", mixBlendMode: "multiply" }}
-                />
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{ background: "var(--duotone-shadow)", mixBlendMode: "lighten" }}
-                />
-              </div>
-            </div>
-            <p className="text-xs font-medium truncate">{film.title}</p>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-xs opacity-50">{film.year}</span>
-              {film.rating > 0 && <Stars rating={film.rating} />}
-            </div>
-          </a>
+          <FilmCard key={film.url} film={film} />
         ))}
       </div>
     </section>

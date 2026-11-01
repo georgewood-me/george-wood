@@ -2,14 +2,34 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 
-interface Track {
+export interface Track {
   title: string;
   artist: string;
   nowPlaying: boolean;
   image: string;
+  imageLarge: string;
 }
 
-function SoundWaves() {
+export function useRecentTrack() {
+  const [track, setTrack] = useState<Track | null>(null);
+
+  useEffect(() => {
+    const apiKey = "2e7aa7aba14b552f8cf7b048661ff913";
+    const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=georgewood_me&api_key=${apiKey}&format=json&limit=1`;
+    fetch(url)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        const t = data?.recenttracks?.track?.[0];
+        const imageOf = (size: string) => t.image?.find((img: { size: string }) => img.size === size)?.["#text"] || "";
+        if (t) setTrack({ title: t.name, artist: t.artist["#text"], nowPlaying: t["@attr"]?.nowplaying === "true", image: imageOf("small"), imageLarge: imageOf("extralarge") });
+      })
+      .catch(() => {});
+  }, []);
+
+  return track;
+}
+
+export function SoundWaves() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
   const offsetsRef = useRef<Float32Array | null>(null);
@@ -130,19 +150,7 @@ function TickerItem({ songText, image }: { songText: { title: string; artist: st
 }
 
 export default function ListeningTicker() {
-  const [track, setTrack] = useState<Track | null>(null);
-
-  useEffect(() => {
-    const apiKey = "2e7aa7aba14b552f8cf7b048661ff913";
-    const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=georgewood_me&api_key=${apiKey}&format=json&limit=1`;
-    fetch(url)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        const t = data?.recenttracks?.track?.[0];
-        if (t) setTrack({ title: t.name, artist: t.artist["#text"], nowPlaying: t["@attr"]?.nowplaying === "true", image: t.image?.find((img: { size: string }) => img.size === "small")?.["#text"] || "" });
-      })
-      .catch(() => {});
-  }, []);
+  const track = useRecentTrack();
 
   const songText = track
     ? { title: track.title, artist: track.artist }

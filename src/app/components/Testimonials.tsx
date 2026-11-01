@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 
-const testimonials = [
+export const testimonials = [
   {
     quote:
       "George is one of the finest digital designers I’ve ever worked with. He is not only a first class creative and product designer but has led our design function at SOON_ for many years. He has a warm, supportive and engaging management style, has led communications with challenging clients and always guides the project to the best outcomes. George brings his considered and structured process to all his work, whether it’s small creative pieces or presenting critical projects to industry titans like world renowned designer Tom Dixon in person. George is an engaging Design leader with a strong production pedigree to whom I give my strongest recommendation.",

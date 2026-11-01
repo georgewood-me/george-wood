@@ -1,12 +1,12 @@
-const projects = [
+export const projects = [
   {
     name: "Tom Dixon",
-    awards: ["W3 Awards x 4"],
+    awards: ["W3 Awards ×4"],
     url: "https://www.tomdixon.net/",
   },
   {
     name: "Belstaff",
-    awards: ["W3 Awards x 3"],
+    awards: ["W3 Awards ×3"],
     url: "https://belstaff.com/",
   },
   {

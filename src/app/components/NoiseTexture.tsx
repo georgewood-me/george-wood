@@ -15,13 +15,9 @@ export default function NoiseTexture() {
 
     function tick(timestamp: number) {
       animId = requestAnimationFrame(tick);
-      const fps =
-        Number(
-          getComputedStyle(document.documentElement).getPropertyValue(
-            "--noise-speed"
-          )
-        ) || 5;
-      if (timestamp - lastFrame < 1000 / fps) return;
+      const speed = getComputedStyle(document.documentElement).getPropertyValue("--noise-speed").trim();
+      const fps = speed === "" ? 0 : Number(speed);
+      if (fps <= 0 || timestamp - lastFrame < 1000 / fps) return;
       lastFrame = timestamp;
       turb!.setAttribute("seed", String(Math.floor(Math.random() * 1000)));
     }
