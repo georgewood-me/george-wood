@@ -76,7 +76,7 @@ export default function ProjectList() {
                 ) : (
                   <a
                     href={project.url}
-                    className="text-sm opacity-70 hover:opacity-100 transition-opacity bg-(--bg-color)"
+                    className="text-sm opacity-80 hover:opacity-100 transition-opacity bg-(--bg-color)"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

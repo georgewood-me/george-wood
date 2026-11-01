@@ -61,12 +61,16 @@ export default function Testimonials() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [current, setCurrent] = useState(0);
 
   function updateScrollState() {
     const el = scrollRef.current;
     if (!el) return;
     setCanScrollLeft(el.scrollLeft > 0);
-    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
+    const atEnd = el.scrollLeft >= el.scrollWidth - el.clientWidth - 1;
+    setCanScrollRight(!atEnd);
+    const card = el.querySelector<HTMLElement>(":scope > div");
+    setCurrent(atEnd ? testimonials.length - 1 : Math.round(el.scrollLeft / (card?.offsetWidth || 400)));
   }
 
   function scroll(direction: "left" | "right") {
@@ -120,6 +124,9 @@ export default function Testimonials() {
         >
           <img src="/images/right.svg" alt="" width={16} height={10} style={{ filter: "invert(var(--svg-invert))" }} className="opacity-70" />
         </button>
+        <span className="flex items-center px-4 text-xs opacity-80 tabular-nums" aria-live="polite">
+          {current + 1} / {testimonials.length}
+        </span>
       </div>
     </section>
   );

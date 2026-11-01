@@ -304,7 +304,7 @@ export default function ControlPanel() {
             <button
               key={f.name}
               onClick={() => setFont(f.name)}
-              className={`glass-btn flex-1 h-[34px] flex items-center justify-center ${font === f.name ? "" : "opacity-60"} hover:opacity-100`}
+              className={`glass-btn flex-1 h-9 flex items-center justify-center ${font === f.name ? "" : "opacity-60"} hover:opacity-100`}
               style={{
                 borderRadius: 4,
                 fontFamily: `var(${f.cssVar})`,
@@ -329,7 +329,7 @@ export default function ControlPanel() {
               <button
                 key={option}
                 onClick={() => setAlign(option)}
-                className={`glass-btn flex-1 h-[34px] flex items-center justify-center gap-[1.5px] ${align === option ? "" : "opacity-60"} hover:opacity-100`}
+                className={`glass-btn flex-1 h-9 flex items-center justify-center gap-[1.5px] ${align === option ? "" : "opacity-60"} hover:opacity-100`}
                 style={{ borderRadius: 4, ...(align === option ? { border: "1px solid color-mix(in srgb, var(--text-color) 60%, transparent)" } : {}) }}
               >
                 {[0, 1, 2].map((i) => (
@@ -354,7 +354,7 @@ export default function ControlPanel() {
       <div className="pt-4 -mx-4 px-4 lg:-mx-4 lg:px-4 flex gap-2" style={{ borderTop: "1px solid var(--border-color)" }}>
         <button
           onClick={randomize}
-          className="glass-btn flex-1 h-[34px] flex items-center justify-center gap-1.5 rounded-[4px] opacity-60 hover:opacity-100"
+          className="glass-btn flex-1 h-9 flex items-center justify-center gap-1.5 rounded-[4px] opacity-60 hover:opacity-100"
           style={{ borderRadius: 4 }}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -368,7 +368,7 @@ export default function ControlPanel() {
         </button>
         <button
           onClick={reset}
-          className="glass-btn flex-1 h-[34px] flex items-center justify-center gap-1.5 rounded-[4px] opacity-60 hover:opacity-100"
+          className="glass-btn flex-1 h-9 flex items-center justify-center gap-1.5 rounded-[4px] opacity-60 hover:opacity-100"
           style={{ borderRadius: 4 }}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -380,7 +380,9 @@ export default function ControlPanel() {
         {isDesktop && (
           <button
             onClick={() => setCursorTrail(cursorTrail > 0 ? 0 : 100)}
-            className={`glass-btn h-[34px] flex items-center justify-center px-3 rounded-[4px] hover:opacity-100 ${cursorTrail > 0 ? "" : "opacity-60"}`}
+            className={`glass-btn h-9 flex items-center justify-center px-3 rounded-[4px] hover:opacity-100 ${cursorTrail > 0 ? "" : "opacity-60"}`}
+            aria-label="Toggle cursor trail"
+            aria-pressed={cursorTrail > 0}
             style={{ borderRadius: 4, ...(cursorTrail > 0 ? { border: "1px solid color-mix(in srgb, var(--text-color) 60%, transparent)" } : {}) }}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -390,7 +392,8 @@ export default function ControlPanel() {
         )}
         <button
           onClick={() => { closePanel(); showToast("Settings saved"); }}
-          className="glass-btn h-[34px] flex items-center justify-center px-3 rounded-[4px] opacity-60 hover:opacity-100"
+          className="glass-btn h-9 flex items-center justify-center px-3 rounded-[4px] opacity-60 hover:opacity-100"
+          aria-label="Save settings"
           style={{ borderRadius: 4 }}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -401,7 +404,8 @@ export default function ControlPanel() {
         </button>
         <button
           onClick={share}
-          className="glass-btn h-[34px] flex items-center justify-center px-3 rounded-[4px] opacity-60 hover:opacity-100"
+          className="glass-btn h-9 flex items-center justify-center px-3 rounded-[4px] opacity-60 hover:opacity-100"
+          aria-label="Copy share link"
           style={{ borderRadius: 4 }}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

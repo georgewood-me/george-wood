@@ -8,6 +8,7 @@ export default function NoiseTexture() {
   useEffect(() => {
     const turb = turbRef.current;
     if (!turb) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     let animId: number;
     let lastFrame = 0;

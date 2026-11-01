@@ -26,7 +26,7 @@ export default function Home() {
       <div className="px-4 flex-1">
         <section className="mt-16 text-sm leading-relaxed">
           <p className="mb-4">
-            I&apos;m a Product Designer at Stripe working in Extensibility. Helping to shape how developers and users extend our platform with apps and extensions.
+            I&apos;m a Product Designer at Stripe working in Extensibility, helping to shape how developers and users extend our platform with apps and extensions.
           </p>
           <p className="mb-4">
             I previously spent over 15 years working in agencies, mainly specialising in designing ecommerce platforms and the tools that empower brands to build and curate campaigns their own way.
@@ -46,16 +46,30 @@ export default function Home() {
         style={{ borderTop: "1px solid var(--border-color)" }}
       >
         <span
-          className="font-semibold py-4 px-4"
+          className="font-semibold py-4 px-3 sm:px-4 whitespace-nowrap"
           style={{ borderRight: "1px solid var(--border-color)" }}
-        >2026</span>
-        <a
-          href="https://x.com/georgewood_me"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="opacity-70 hover:opacity-100 transition-opacity py-4 px-4"
-          style={{ borderLeft: "1px solid var(--border-color)" }}
-        >@georgewood_me</a>
+        >© 2026<span className="hidden sm:inline"> George Wood</span></span>
+        <div className="flex">
+          <a
+            href="mailto:georgewood.me@gmail.com"
+            className="opacity-80 hover:opacity-100 transition-opacity py-4 px-3 sm:px-4"
+            style={{ borderLeft: "1px solid var(--border-color)" }}
+          >Email</a>
+          <a
+            href="https://www.linkedin.com/in/georgewood-me/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="opacity-80 hover:opacity-100 transition-opacity py-4 px-3 sm:px-4"
+            style={{ borderLeft: "1px solid var(--border-color)" }}
+          >LinkedIn</a>
+          <a
+            href="https://x.com/georgewood_me"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="opacity-80 hover:opacity-100 transition-opacity py-4 px-3 sm:px-4"
+            style={{ borderLeft: "1px solid var(--border-color)" }}
+          >@georgewood_me</a>
+        </div>
       </footer>
 
       <ControlPanel />
