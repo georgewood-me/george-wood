@@ -46,12 +46,12 @@ export default function RecentFilms() {
   return (
     <section className="mt-16">
       <div className="flex items-center justify-between mb-4">
-        <span className="text-xs" style={{ opacity: 0.7, letterSpacing: "0.04em" }}>RECENTLY WATCHED</span>
+        <span className="text-xs" style={{ opacity: 0.8, letterSpacing: "0.04em" }}>RECENTLY WATCHED</span>
         <a
           href="https://letterboxd.com/Woody7Figure/"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm opacity-70 hover:opacity-100 transition-opacity"
+          className="text-sm opacity-80 hover:opacity-100 transition-opacity"
         >
           Letterboxd ↗
         </a>

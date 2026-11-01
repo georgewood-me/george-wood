@@ -77,6 +77,7 @@ function SoundWaves() {
       ctx.fill();
     }
 
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     animRef.current = requestAnimationFrame(animate);
   }, []);
 
@@ -122,8 +123,8 @@ function TickerItem({ songText, image }: { songText: { title: string; artist: st
           <path d="M12 18V2l7 4" />
         </svg>
       )}
-      <span className="font-medium" style={{ paddingLeft: 8, letterSpacing: "-0.03em" }}>{songText.title}</span>
-      <span className="font-normal" style={{ paddingLeft: 6, letterSpacing: "-0.03em", opacity: 0.7 }}>{songText.artist}</span>
+      <span className="font-medium" style={{ paddingLeft: 8 }}>{songText.title}</span>
+      <span className="font-normal" style={{ paddingLeft: 6, opacity: 0.8 }}>{songText.artist}</span>
     </span>
   );
 }
@@ -199,7 +200,7 @@ export default function ListeningTicker() {
       <div className="absolute inset-y-0 left-0 z-10 pointer-events-none" style={{ width: 150, background: "linear-gradient(to right, var(--bg-color) 70%, transparent)" }} />
       <span
         className="absolute inset-y-0 left-0 z-20 text-xs flex items-center pl-4"
-        style={{ opacity: 0.7, letterSpacing: "0.04em" }}
+        style={{ opacity: 0.8, letterSpacing: "0.04em" }}
       >
         LISTENING TO
       </span>
