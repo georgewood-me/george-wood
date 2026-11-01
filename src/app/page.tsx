@@ -39,16 +39,6 @@ export default function Home() {
         <FilmsTile index={7} />
       </main>
 
-      <footer
-        className="mt-auto flex items-center justify-between text-sm"
-        style={{ borderTop: "1px solid var(--border-color)" }}
-      >
-        <span
-          className="font-medium py-4 px-4 whitespace-nowrap"
-          style={{ borderRight: "1px solid var(--border-color)" }}
-        >© 2026 George Wood</span>
-      </footer>
-
       <ControlPanel containerWidth={CONTAINER_WIDTH} desktopTop={20} />
     </div>
   );

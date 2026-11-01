@@ -320,7 +320,7 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
       <Slider label="Borders" value={borders} onChange={setBorders} min={0} max={100} suffix="%" />
       <Slider label="Noise" value={noise} onChange={setNoise} min={0} max={80} suffix="%" />
       <Slider label="Noise speed" value={noiseSpeed} onChange={setNoiseSpeed} min={0} max={25} suffix="fps" />
-      <Slider label="Sound waves" value={waves} onChange={setWaves} min={0} max={200} suffix="%" />
+      <Slider label="Motion" value={waves} onChange={setWaves} min={0} max={200} suffix="%" />
       <Slider label="Scanlines" value={scanlines} onChange={setScanlines} min={0} max={100} suffix="%" />
 
       <div className="mt-4 mb-4">

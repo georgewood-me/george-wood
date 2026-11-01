@@ -8,6 +8,7 @@ import { projects } from "./projects";
 import { testimonials } from "./testimonials";
 import { FilmCard, useRecentFilms } from "./Films";
 import { PRESETS } from "./ControlPanel";
+import { WeatherBackdrop, DotGrid, ColourDrift } from "./TileBackdrops";
 
 const WEATHER_LABELS: Record<WeatherType, string> = {
   sun: "Clear",
@@ -41,7 +42,7 @@ function Tile({
       style={{ "--tile-delay": `${index * 100}ms` } as CSSProperties}
     >
       {label && (
-        <div className="flex items-center justify-between min-h-6">
+        <div className="relative flex items-center justify-between min-h-6">
           <span className="tile-label">{label}</span>
           {aside}
         </div>
@@ -145,8 +146,9 @@ export function ClockTile({ index }: { index: number }) {
   const { time, weather } = useNottingham();
   const Icon = weather ? WEATHER_ICONS[weather.type] : null;
   return (
-    <Tile index={index} label="Nottingham, UK" className="col-span-1 min-h-60">
-      <div className="mt-auto">
+    <Tile index={index} label="Nottingham, UK" className="col-span-1 min-h-60 overflow-hidden">
+      <WeatherBackdrop type={weather?.type ?? null} />
+      <div className="relative mt-auto">
         <p className="text-[40px] min-[375px]:text-[44px] sm:text-5xl font-medium leading-none tabular-nums" style={{ letterSpacing: "-0.03em" }}>
           {time || " "}
         </p>
@@ -173,7 +175,8 @@ const contactLinks = [
 export function ContactTile({ index }: { index: number }) {
   return (
     <Tile index={index} label="Say hello" className="col-span-2 sm:col-span-1">
-      <ul className="mt-auto pt-4">
+      <DotGrid />
+      <ul className="relative mt-auto pt-4">
         {contactLinks.map((link) => (
           <li key={link.label}>
             <a
@@ -200,11 +203,12 @@ export function MakeItYoursTile({ index }: { index: number }) {
   }, []);
 
   return (
-    <Tile index={index} label="Make it yours" className="col-span-2 sm:col-span-1">
-      <p className="mt-4 text-sm leading-normal opacity-80">
+    <Tile index={index} label="Make it yours" className="col-span-2 sm:col-span-1 overflow-hidden">
+      <ColourDrift />
+      <p className="relative mt-4 text-sm leading-normal opacity-80">
         Change the colour, texture and type, then share your version
       </p>
-      <div className="mt-auto pt-6 grid grid-cols-8 gap-2">
+      <div className="relative mt-auto pt-6 grid grid-cols-8 gap-2">
         {PRESETS.map((color) => (
           <button
             key={color}
@@ -223,7 +227,7 @@ export function MakeItYoursTile({ index }: { index: number }) {
       </div>
       <button
         onClick={() => window.dispatchEvent(new Event("controls:open"))}
-        className="glass-btn glass-surface mt-4 h-11 sm:h-9 flex items-center justify-center gap-1.5 rounded-[4px] text-xs opacity-80 hover:opacity-100 transition-opacity"
+        className="glass-btn glass-surface relative mt-4 h-11 sm:h-9 flex items-center justify-center gap-1.5 rounded-[4px] text-xs opacity-80 hover:opacity-100 transition-opacity"
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <line x1="4" y1="21" x2="4" y2="3" />
@@ -357,7 +361,7 @@ export function FilmsTile({ index }: { index: number }) {
         </a>
       }
     >
-      <div className="mt-4 grid grid-cols-3 sm:grid-cols-6 gap-3">
+      <div className="relative mt-4 grid grid-cols-3 sm:grid-cols-6 gap-3">
         {films.map((film) => (
           <FilmCard key={film.url} film={film} />
         ))}

@@ -156,9 +156,11 @@ export function useNottingham() {
         );
         const data = await res.json();
         const code = data.current.weather_code as number;
+        // ?weather=rain (or any WeatherType) previews that weather's icon and backdrop
+        const preview = new URLSearchParams(window.location.search).get("weather") as WeatherType | null;
         setWeather({
           temp: Math.round(data.current.temperature_2m),
-          type: WEATHER_MAP[code] ?? "cloud",
+          type: preview && preview in WEATHER_ICONS ? preview : WEATHER_MAP[code] ?? "cloud",
         });
       } catch {}
     }

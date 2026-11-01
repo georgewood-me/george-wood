@@ -181,3 +181,19 @@ html[data-cursor-trail="true"] [role="button"] {
   text-transform: uppercase;
   font-feature-settings: normal;
 }
+
+/* A slow wash through the swatch colours, fading out before the tile label */
+.colour-drift {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-size: 400% 100%;
+  opacity: calc(0.16 * var(--wave-intensity, 1));
+  mask-image: linear-gradient(to top, black, transparent 85%);
+  animation: colour-drift 40s ease-in-out infinite alternate;
+}
+
+@keyframes colour-drift {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
