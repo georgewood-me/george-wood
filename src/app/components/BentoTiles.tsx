@@ -233,11 +233,12 @@ export function MakeItYoursTile({ index }: { index: number }) {
 export function WorkTile({ index }: { index: number }) {
   return (
     <Tile index={index} label="Selected work" className="col-span-2">
-      <ul className="mt-auto pt-4 -mx-5 -mb-5">
+      {/* Rows share any spare height evenly, so the list lines up with the tile beside it */}
+      <ul id="work-list" className="flex flex-col flex-1 mt-4 -mx-5 -mb-5">
         {projects.map((project) => (
           <li
             key={project.name}
-            className="flex items-center justify-between gap-3 px-5 py-3"
+            className="flex flex-1 items-center justify-between gap-3 px-5 py-3"
             style={{ borderTop: "1px solid var(--border-color)" }}
           >
             <div
@@ -274,36 +275,35 @@ export function KindWordsTile({ index }: { index: number }) {
   const [current, setCurrent] = useState(0);
   const count = testimonials.length;
   const step = (delta: number) => setCurrent((c) => (c + delta + count) % count);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const arrow = "relative w-14 flex items-center justify-center border-l opacity-80 hover:opacity-100 transition-opacity";
+  const rule = { borderColor: "var(--border-color)" };
+
+  // On desktop this tile sits beside Selected work, so its control strip takes the height of a
+  // work row. The rows stretch with this tile, which includes the strip, so the measurement is
+  // rounded to whole pixels; the two settle within a frame or two rather than chasing each other.
+  const [stripHeight, setStripHeight] = useState<number | null>(null);
+  useEffect(() => {
+    const list = document.getElementById("work-list");
+    if (!list) return;
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const sync = () => {
+      const row = list.firstElementChild?.getBoundingClientRect().height;
+      setStripHeight(desktop.matches && row ? Math.round(row) : null);
+    };
+    const observer = new ResizeObserver(sync);
+    observer.observe(list);
+    desktop.addEventListener("change", sync);
+    return () => {
+      observer.disconnect();
+      desktop.removeEventListener("change", sync);
+    };
+  }, []);
 
   return (
-    <Tile
-      index={index}
-      label="Kind words"
-      className="col-span-2"
-      aside={
-        <div className="flex items-center gap-1 -my-2.5 -mr-2.5 sm:-my-1 sm:-mr-1">
-          <span className="text-xs opacity-80 tabular-nums mr-2" aria-live="polite">
-            {current + 1} / {count}
-          </span>
-          <button
-            onClick={() => step(-1)}
-            className="w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center rounded-[4px] opacity-80 hover:opacity-100 transition-opacity"
-            aria-label="Previous quote"
-          >
-            <img src="/images/left.svg" alt="" width={16} height={10} style={{ filter: "invert(var(--svg-invert))" }} />
-          </button>
-          <button
-            onClick={() => step(1)}
-            className="w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center rounded-[4px] opacity-80 hover:opacity-100 transition-opacity"
-            aria-label="Next quote"
-          >
-            <img src="/images/right.svg" alt="" width={16} height={10} style={{ filter: "invert(var(--svg-invert))" }} />
-          </button>
-        </div>
-      }
-    >
+    <Tile index={index} label="Kind words" className="col-span-2">
       {/* Every quote sits in the same cell so the tile is always as tall as the longest one */}
-      <div className="grid flex-1 mt-4">
+      <div className="relative grid flex-1 mt-6">
         {testimonials.map((t, i) => (
           <figure
             key={t.name}
@@ -312,10 +312,10 @@ export function KindWordsTile({ index }: { index: number }) {
             style={{ gridArea: "1 / 1", opacity: i === current ? 1 : 0, pointerEvents: i === current ? "auto" : "none" }}
           >
             <blockquote className="text-[15px] sm:text-base leading-normal max-w-[60ch]">{t.quote}</blockquote>
-            <figcaption className="flex items-end justify-between mt-6">
+            <figcaption className="flex items-end justify-between gap-4 mt-8">
               <div>
-                <p className="text-xs font-medium">{t.name}</p>
-                <p className="text-xs opacity-50">{t.role}</p>
+                <p className="text-sm font-medium leading-snug">{t.name}</p>
+                <p className="text-xs opacity-50 mt-0.5">{t.role}</p>
               </div>
               {t.logo && (
                 <Image src={t.logo} alt="" width={100} height={24} className="opacity-70" style={{ filter: "invert(var(--svg-invert))" }} />
@@ -323,6 +323,19 @@ export function KindWordsTile({ index }: { index: number }) {
             </figcaption>
           </figure>
         ))}
+      </div>
+
+      {/* Controls sit in a ruled strip along the foot of the tile, like the grid around it */}
+      <div className="relative flex h-14 -mx-5 -mb-5 mt-8 border-t" style={{ ...rule, ...(stripHeight ? { height: stripHeight } : {}) }}>
+        <span className="tile-label flex items-center px-5 mr-auto tabular-nums" aria-live="polite">
+          {pad(current + 1)} / {pad(count)}
+        </span>
+        <button onClick={() => step(-1)} className={arrow} style={rule} aria-label="Previous quote">
+          <img src="/images/left.svg" alt="" width={16} height={10} style={{ filter: "invert(var(--svg-invert))" }} />
+        </button>
+        <button onClick={() => step(1)} className={arrow} style={rule} aria-label="Next quote">
+          <img src="/images/right.svg" alt="" width={16} height={10} style={{ filter: "invert(var(--svg-invert))" }} />
+        </button>
       </div>
     </Tile>
   );

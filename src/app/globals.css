@@ -181,7 +181,7 @@ html[data-cursor-trail="true"] [role="button"] {
   font-feature-settings: normal;
 }
 
-/* A slow wash through the swatch colours that fades out before the tile label */
+/* A wash through the swatch colours that fades out before the tile label */
 .colour-drift {
   position: absolute;
   inset: 0;
@@ -189,7 +189,7 @@ html[data-cursor-trail="true"] [role="button"] {
   background-size: 400% 100%;
   opacity: calc(0.2 * var(--wave-intensity, 1));
   mask-image: linear-gradient(to top, black, transparent 85%);
-  animation: colour-drift 40s ease-in-out infinite alternate;
+  animation: colour-drift 12s ease-in-out infinite alternate;
 }
 
 @keyframes colour-drift {
