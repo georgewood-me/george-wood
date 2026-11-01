@@ -117,6 +117,18 @@ const WEATHER_MAP: Record<number, WeatherType> = {
   85: "snow", 86: "snow", 95: "thunder", 96: "thunder", 99: "thunder",
 };
 
+export const WEATHER_LABELS: Record<WeatherType, string> = {
+  sun: "Clear",
+  "cloud-sun": "Partly cloudy",
+  cloud: "Cloudy",
+  fog: "Fog",
+  drizzle: "Drizzle",
+  rain: "Rain",
+  snow: "Snow",
+  snowflake: "Heavy snow",
+  thunder: "Thunder",
+};
+
 export const WEATHER_ICONS: Record<WeatherType, () => ReactNode> = {
   sun: Sun,
   "cloud-sun": CloudSun,

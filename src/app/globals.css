@@ -66,7 +66,6 @@ html[data-cursor-trail="true"] [role="button"] {
 
 @keyframes tile-in {
   from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: none; }
 }
 
 .bento-tile > * {
@@ -182,13 +181,13 @@ html[data-cursor-trail="true"] [role="button"] {
   font-feature-settings: normal;
 }
 
-/* A slow wash through the swatch colours, fading out before the tile label */
+/* A slow wash through the swatch colours that fades out before the tile label */
 .colour-drift {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background-size: 400% 100%;
-  opacity: calc(0.16 * var(--wave-intensity, 1));
+  opacity: calc(0.2 * var(--wave-intensity, 1));
   mask-image: linear-gradient(to top, black, transparent 85%);
   animation: colour-drift 40s ease-in-out infinite alternate;
 }

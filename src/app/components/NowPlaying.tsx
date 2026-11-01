@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
+import { hexToRgb } from "./TileBackdrops";
 
 export interface Track {
   title: string;
@@ -34,7 +35,7 @@ export function SoundWaves() {
   const animRef = useRef<number>(0);
   const offsetsRef = useRef<Float32Array | null>(null);
   const sizeRef = useRef({ w: 0, h: 0 });
-  const styleCache = useRef({ intensity: 1, fill: "rgba(255,255,255,0.12)", lastRead: 0 });
+  const styleCache = useRef({ intensity: 1, fill: "rgba(255,255,255,0.1)", lastRead: 0 });
 
   const animate = useCallback(() => {
     const canvas = canvasRef.current;
@@ -53,11 +54,7 @@ export function SoundWaves() {
     if (now - sc.lastRead > 100) {
       const styles = getComputedStyle(document.documentElement);
       sc.intensity = Number(styles.getPropertyValue("--wave-intensity")) || 1;
-      const textColor = styles.getPropertyValue("--text-color").trim() || "#ffffff";
-      const r = parseInt(textColor.slice(1, 3), 16);
-      const g = parseInt(textColor.slice(3, 5), 16);
-      const b = parseInt(textColor.slice(5, 7), 16);
-      sc.fill = `rgba(${r}, ${g}, ${b}, ${0.12 * sc.intensity})`;
+      sc.fill = `rgba(${hexToRgb(styles.getPropertyValue("--text-color"))}, ${0.1 * sc.intensity})`;
       sc.lastRead = now;
     }
 

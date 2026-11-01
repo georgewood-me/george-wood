@@ -7,11 +7,17 @@ import type { WeatherType } from "./Weather";
 // Background layers for tiles. Like the sound waves, they draw in the text colour at low
 // opacity, scale with the Motion slider (--wave-intensity) and hold still for reduced motion.
 
+// "#fff" or "#ffffff" to "255, 255, 255"; the stylesheet build shortens hex colours
+export function hexToRgb(color: string) {
+  let hex = color.trim().replace("#", "") || "ffffff";
+  if (hex.length === 3) hex = [...hex].map((c) => c + c).join("");
+  return `${parseInt(hex.slice(0, 2), 16)}, ${parseInt(hex.slice(2, 4), 16)}, ${parseInt(hex.slice(4, 6), 16)}`;
+}
+
 function readInk() {
   const styles = getComputedStyle(document.documentElement);
-  const hex = styles.getPropertyValue("--text-color").trim() || "#ffffff";
   return {
-    rgb: `${parseInt(hex.slice(1, 3), 16)}, ${parseInt(hex.slice(3, 5), 16)}, ${parseInt(hex.slice(5, 7), 16)}`,
+    rgb: hexToRgb(styles.getPropertyValue("--text-color")),
     intensity: Number(styles.getPropertyValue("--wave-intensity")) || 0,
   };
 }
@@ -90,34 +96,71 @@ const seeded = (i: number, salt: number) => {
   return x - Math.floor(x);
 };
 
-function drawClouds(ctx: CanvasRenderingContext2D, w: number, h: number, t: number, rgb: string, alpha: number) {
-  for (let i = 0; i < 5; i++) {
-    const bandW = w * (0.5 + seeded(i, 1) * 0.6);
-    const bandH = 10 + seeded(i, 2) * 14;
-    const speed = 6 + seeded(i, 3) * 8;
-    const x = ((seeded(i, 4) * (w + bandW) + t * speed) % (w + bandW)) - bandW;
-    const y = h * (0.12 + seeded(i, 5) * 0.55);
-    ctx.fillStyle = `rgba(${rgb}, ${alpha * (0.5 + seeded(i, 6) * 0.5)})`;
-    ctx.beginPath();
-    ctx.roundRect(x, y, bandW, bandH, bandH / 2);
-    ctx.fill();
+// A soft round puff: full strength in the middle, fading to nothing at the edge
+function puff(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, rgb: string, a: number) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, `rgba(${rgb}, ${a})`);
+  g.addColorStop(0.55, `rgba(${rgb}, ${a * 0.55})`);
+  g.addColorStop(1, `rgba(${rgb}, 0)`);
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// Each cloud is a cluster of overlapping puffs; overlaps build up into a denser middle
+const CLOUD_PUFFS = [
+  [-1.15, 0.25, 0.75],
+  [-0.5, -0.2, 1],
+  [0.25, -0.45, 1.1],
+  [0.95, -0.05, 0.9],
+  [0.15, 0.3, 0.95],
+];
+
+function drawClouds(ctx: CanvasRenderingContext2D, w: number, h: number, t: number, rgb: string, alpha: number, count: number) {
+  for (let i = 0; i < count; i++) {
+    const r = h * (0.13 + seeded(i, 1) * 0.07);
+    const span = w + r * 5;
+    // Nearer (bigger) clouds drift a little faster
+    const speed = 4 + (r / h) * 40;
+    const x = ((seeded(i, 4) * span + t * speed) % span) - r * 2.5;
+    const y = h * (0.18 + seeded(i, 5) * 0.45);
+    for (const [dx, dy, scale] of CLOUD_PUFFS) {
+      puff(ctx, x + dx * r, y + dy * r, r * scale, rgb, alpha);
+    }
+  }
+}
+
+// Long, low mist layers that slide past each other in opposite directions
+function drawFog(ctx: CanvasRenderingContext2D, w: number, h: number, t: number, rgb: string, alpha: number) {
+  const layers = 6;
+  for (let i = 0; i < layers; i++) {
+    const y = (h * (i + 0.5)) / layers + Math.sin(t * 0.3 + i) * 4;
+    const direction = i % 2 ? -1 : 1;
+    const span = w * 2;
+    const x = ((((seeded(i, 11) * span + t * 8 * direction) % span) + span) % span) - w * 0.5;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(6, 1);
+    puff(ctx, 0, 0, (h / layers) * 1.3, rgb, alpha * 1.6);
+    ctx.restore();
   }
 }
 
 function drawFall(ctx: CanvasRenderingContext2D, w: number, h: number, t: number, rgb: string, alpha: number, kind: "rain" | "drizzle" | "snow") {
-  const count = kind === "rain" ? 70 : kind === "drizzle" ? 35 : 45;
-  const speed = kind === "snow" ? 18 : kind === "rain" ? 260 : 160;
+  const count = kind === "rain" ? 70 : kind === "drizzle" ? 35 : 70;
+  const speed = kind === "snow" ? 22 : kind === "rain" ? 260 : 160;
   const length = kind === "rain" ? 12 : 7;
   ctx.strokeStyle = `rgba(${rgb}, ${alpha})`;
-  ctx.fillStyle = `rgba(${rgb}, ${alpha * 1.4})`;
+  ctx.fillStyle = `rgba(${rgb}, ${alpha * 1.6})`;
   ctx.lineWidth = 1;
   for (let i = 0; i < count; i++) {
     const travel = h + 40;
     const y = ((seeded(i, 7) * travel + t * speed * (0.8 + seeded(i, 8) * 0.4)) % travel) - 20;
     if (kind === "snow") {
-      const x = seeded(i, 9) * w + Math.sin(t * 0.8 + i) * 6;
+      const x = seeded(i, 9) * w + Math.sin(t * 0.8 + i) * 8;
       ctx.beginPath();
-      ctx.arc(x, y, 1 + seeded(i, 10) * 1.2, 0, Math.PI * 2);
+      ctx.arc(x, y, 1.2 + seeded(i, 10) * 1.6, 0, Math.PI * 2);
       ctx.fill();
     } else {
       // Rain falls on a slight diagonal, as if blown by the wind
@@ -130,21 +173,48 @@ function drawFall(ctx: CanvasRenderingContext2D, w: number, h: number, t: number
   }
 }
 
+// The sun: a clear disc with a soft edge, a halo around it, and a wide glow that breathes slowly
 function drawSun(ctx: CanvasRenderingContext2D, w: number, h: number, t: number, rgb: string, alpha: number) {
-  const r = Math.max(w, h) * (0.55 + Math.sin(t * 0.6) * 0.04);
-  const glow = ctx.createRadialGradient(w, 0, 0, w, 0, r);
-  glow.addColorStop(0, `rgba(${rgb}, ${alpha * 2.2})`);
+  const breath = 1 + Math.sin(t * 0.6) * 0.05;
+  const x = w * 0.76;
+  const y = h * 0.3;
+  const r = Math.min(w, h) * 0.17;
+
+  const glow = ctx.createRadialGradient(x, y, r, x, y, Math.hypot(w, h) * 0.7 * breath);
+  glow.addColorStop(0, `rgba(${rgb}, ${alpha * 1.4})`);
   glow.addColorStop(1, `rgba(${rgb}, 0)`);
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, w, h);
+
+  // Halo: a faint ring just outside the disc
+  const halo = ctx.createRadialGradient(x, y, r, x, y, r * 1.9 * breath);
+  halo.addColorStop(0, `rgba(${rgb}, ${alpha * 1.2})`);
+  halo.addColorStop(1, `rgba(${rgb}, 0)`);
+  ctx.fillStyle = halo;
+  ctx.beginPath();
+  ctx.arc(x, y, r * 1.9 * breath, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Disc: even through most of its radius so it reads as a sun, then softening into the halo
+  const disc = ctx.createRadialGradient(x, y, 0, x, y, r);
+  disc.addColorStop(0, `rgba(${rgb}, ${alpha * 2})`);
+  disc.addColorStop(0.65, `rgba(${rgb}, ${alpha * 1.8})`);
+  disc.addColorStop(1, `rgba(${rgb}, ${alpha * 0.4})`);
+  ctx.fillStyle = disc;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 export function WeatherBackdrop({ type }: { type: WeatherType | null }) {
   const canvasRef = useTileCanvas((ctx, w, h, t, { rgb, intensity }) => {
     if (!type) return;
-    const alpha = 0.08 * intensity;
+    const alpha = 0.1 * intensity;
     if (type === "sun" || type === "cloud-sun") drawSun(ctx, w, h, t, rgb, alpha);
-    if (type === "cloud-sun" || type === "cloud" || type === "fog") drawClouds(ctx, w, h, t, rgb, type === "fog" ? alpha * 1.3 : alpha);
+    if (type === "cloud-sun") drawClouds(ctx, w, h, t, rgb, alpha, 5);
+    if (type === "cloud") drawClouds(ctx, w, h, t, rgb, alpha, 7);
+    if (type === "thunder") drawClouds(ctx, w, h, t, rgb, alpha, 5);
+    if (type === "fog") drawFog(ctx, w, h, t, rgb, alpha);
     if (type === "drizzle") drawFall(ctx, w, h, t, rgb, alpha * 1.6, "drizzle");
     if (type === "rain" || type === "thunder") drawFall(ctx, w, h, t, rgb, alpha * 1.6, "rain");
     if (type === "snow" || type === "snowflake") drawFall(ctx, w, h, t, rgb, alpha * 1.6, "snow");
@@ -190,7 +260,7 @@ export function DotGrid() {
           const near = Math.max(0, 1 - Math.hypot(dx, dy) / reach) * p.strength;
           const lean = near * 4;
           const dist = Math.hypot(dx, dy) || 1;
-          ctx.fillStyle = `rgba(${rgb}, ${(0.12 + near * 0.45) * intensity})`;
+          ctx.fillStyle = `rgba(${rgb}, ${(0.15 + near * 0.45) * intensity})`;
           ctx.beginPath();
           ctx.arc(x + (dx / dist) * lean, y + (dy / dist) * lean, 1 + near * 0.8, 0, Math.PI * 2);
           ctx.fill();

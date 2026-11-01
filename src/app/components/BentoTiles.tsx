@@ -3,25 +3,12 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import Image from "next/image";
 import { SoundWaves, useRecentTrack } from "./NowPlaying";
-import { useNottingham, WEATHER_ICONS, type WeatherType } from "./Weather";
+import { useNottingham, WEATHER_ICONS, WEATHER_LABELS } from "./Weather";
 import { projects } from "./projects";
 import { testimonials } from "./testimonials";
 import { FilmCard, useRecentFilms } from "./Films";
 import { PRESETS } from "./ControlPanel";
 import { WeatherBackdrop, DotGrid, ColourDrift } from "./TileBackdrops";
-
-const WEATHER_LABELS: Record<WeatherType, string> = {
-  sun: "Clear",
-  "cloud-sun": "Partly cloudy",
-  cloud: "Cloudy",
-  fog: "Fog",
-  drizzle: "Drizzle",
-  rain: "Rain",
-  snow: "Snow",
-  snowflake: "Heavy snow",
-  thunder: "Thunder",
-};
-
 
 function Tile({
   label,
@@ -135,7 +122,7 @@ export function NowPlayingTile({ index }: { index: number }) {
         <p className="mt-3 text-base font-medium leading-snug line-clamp-2">{track?.title ?? "\u00a0"}</p>
         <p className="text-sm leading-snug opacity-80 truncate">{track?.artist ?? "\u00a0"}</p>
       </div>
-      <div className="absolute inset-x-0 bottom-0 h-24">
+      <div className="absolute inset-0" style={{ maskImage: "linear-gradient(to top, black, transparent 90%)" }}>
         <SoundWaves />
       </div>
     </Tile>
