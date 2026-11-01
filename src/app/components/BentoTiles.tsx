@@ -224,7 +224,7 @@ export function MakeItYoursTile({ index }: { index: number }) {
       </div>
       <button
         onClick={() => window.dispatchEvent(new Event("controls:open"))}
-        className="glass-btn mt-4 h-11 sm:h-9 flex items-center justify-center gap-1.5 rounded-[4px] text-xs opacity-80 hover:opacity-100 transition-opacity"
+        className="glass-btn glass-surface mt-4 h-11 sm:h-9 flex items-center justify-center gap-1.5 rounded-[4px] text-xs opacity-80 hover:opacity-100 transition-opacity"
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <line x1="4" y1="21" x2="4" y2="3" />
