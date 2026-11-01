@@ -2,11 +2,11 @@
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import Image from "next/image";
-import { SoundWaves, useRecentTrack } from "./ListeningTicker";
-import { useNottingham, WEATHER_ICONS, type WeatherType } from "./Header";
-import { projects } from "./ProjectList";
-import { testimonials } from "./Testimonials";
-import { FilmCard, useRecentFilms } from "./RecentFilms";
+import { SoundWaves, useRecentTrack } from "./NowPlaying";
+import { useNottingham, WEATHER_ICONS, type WeatherType } from "./Weather";
+import { projects } from "./projects";
+import { testimonials } from "./testimonials";
+import { FilmCard, useRecentFilms } from "./Films";
 import { PRESETS } from "./ControlPanel";
 
 const WEATHER_LABELS: Record<WeatherType, string> = {
@@ -21,7 +21,6 @@ const WEATHER_LABELS: Record<WeatherType, string> = {
   thunder: "Thunder",
 };
 
-const labelStyle = { opacity: 0.8 };
 
 function Tile({
   label,
@@ -43,7 +42,7 @@ function Tile({
     >
       {label && (
         <div className="flex items-center justify-between min-h-6">
-          <span className="text-xs" style={labelStyle}>{label}</span>
+          <span className="tile-label">{label}</span>
           {aside}
         </div>
       )}

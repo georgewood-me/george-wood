@@ -5,10 +5,12 @@ import { useState, useEffect, useRef } from "react";
 export const PRESETS = ["#0038FF", "#000000", "#FFFFFF", "#E50000", "#E28C00", "#06CA1D", "#06BDCA", "#CA06CA"];
 
 const FONTS = [
-  { label: "Aa", cssVar: "--font-inter", name: "inter" },
-  { label: "Aa", cssVar: "--font-bricolage", name: "bricolage" },
-  { label: "Aa", cssVar: "--font-archivo", name: "archivo" },
-  { label: "Aa", cssVar: "--font-inconsolata", name: "inconsolata" },
+  { label: "Inter", cssVar: "--font-inter", name: "inter", features: '"cv05", "ss03"' },
+  { label: "Geist", cssVar: "--font-geist", name: "geist", features: "normal" },
+  { label: "Switzer", cssVar: "--font-switzer", name: "switzer", features: "normal" },
+  { label: "Bricolage", cssVar: "--font-bricolage", name: "bricolage", features: "normal" },
+  { label: "Archivo Narrow", cssVar: "--font-archivo", name: "archivo", features: "normal" },
+  { label: "Inconsolata", cssVar: "--font-inconsolata", name: "inconsolata", features: "normal" },
 ] as const;
 
 type Finish = "flat" | "glass";
@@ -22,7 +24,6 @@ const DEFAULTS = {
   bg: "#0038FF",
   noise: 20,
   noiseSpeed: 0,
-  marquee: 20,
   waves: 100,
   borders: 20,
   scanlines: 0,
@@ -84,7 +85,6 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
   const textColor = textColorForBg(bg);
   const [noise, setNoise] = useState(DEFAULTS.noise);
   const [noiseSpeed, setNoiseSpeed] = useState(DEFAULTS.noiseSpeed);
-  const [marquee, setMarquee] = useState(DEFAULTS.marquee);
   const [waves, setWaves] = useState(DEFAULTS.waves);
   const [borders, setBorders] = useState(DEFAULTS.borders);
   const [scanlines, setScanlines] = useState(DEFAULTS.scanlines);
@@ -192,7 +192,6 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
     root.style.setProperty("--svg-invert", textColor === "#000000" ? "1" : "0");
     root.style.setProperty("--noise-opacity", String(noise / 100));
     root.style.setProperty("--noise-speed", String(noiseSpeed));
-    root.style.setProperty("--marquee-duration", `${marquee}s`);
     root.style.setProperty("--wave-intensity", String(waves / 100));
     root.style.setProperty("--scanlines", String(scanlines));
     root.style.setProperty("--cursor-trail", String(cursorTrail));
@@ -201,6 +200,7 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
     if (activeFont) {
       const fontValue = getComputedStyle(document.body).getPropertyValue(activeFont.cssVar).trim();
       root.style.setProperty("--active-font", fontValue);
+      root.style.setProperty("--active-features", activeFont.features);
     }
     const bgLum = luminance(bg);
     const textLum = luminance(textColor);
@@ -221,7 +221,7 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
     document.body.style.color = textColor;
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", bg);
     window.dispatchEvent(new CustomEvent("controls:change", { detail: { bg } }));
-  }, [bg, noise, noiseSpeed, marquee, waves, borders, scanlines, cursorTrail, font, align, finish, containerWidth]);
+  }, [bg, noise, noiseSpeed, waves, borders, scanlines, cursorTrail, font, align, finish, containerWidth]);
 
   function randomize() {
     setBg(
@@ -327,7 +327,7 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
         <div className="mb-1.5">
           <span>Typeface</span>
         </div>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {FONTS.map((f) => (
             <button
               key={f.name}

@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import Image from "next/image";
 
 const iconSize = { width: 14, height: 14 };
 
+// The glyphs aren't centred in their 24-unit boxes (the clouds sit low and right),
+// so each viewBox is centred on its own glyph to sit optically level with the text
+const centredOn = (cx: number, cy: number) => ({ ...iconSize, viewBox: `${cx - 12} ${cy - 12} 24 24` });
+
 function Sun() {
   return (
-    <svg {...iconSize} viewBox="0 0 24 24" fill="currentColor">
+    <svg {...centredOn(12, 12)} fill="currentColor">
       <circle cx="12" cy="12" r="4" />
       <rect x="11" y="1" width="2" height="4" rx="1" />
       <rect x="11" y="19" width="2" height="4" rx="1" />
@@ -23,7 +26,7 @@ function Sun() {
 
 function CloudSun() {
   return (
-    <svg {...iconSize} viewBox="0 0 24 24" fill="currentColor">
+    <svg {...centredOn(13, 11.5)} fill="currentColor">
       <circle cx="10" cy="7" r="3" />
       <rect x="9" y="1" width="2" height="2.5" rx="1" />
       <rect x="3.5" y="6" width="2.5" height="2" rx="1" />
@@ -35,7 +38,7 @@ function CloudSun() {
 
 function Cloud() {
   return (
-    <svg {...iconSize} viewBox="0 0 24 24" fill="currentColor">
+    <svg {...centredOn(14.75, 17.06)} fill="currentColor">
       <path d="M19.5 16a4.5 4.5 0 0 0-8.7-1.5H9.5a4 4 0 1 0 0 8h10a4.5 4.5 0 0 0 0-9z" />
     </svg>
   );
@@ -43,7 +46,7 @@ function Cloud() {
 
 function Fog() {
   return (
-    <svg {...iconSize} viewBox="0 0 24 24" fill="currentColor">
+    <svg {...centredOn(12, 14.25)} fill="currentColor">
       <rect x="2" y="8" width="20" height="2.5" rx="1.25" />
       <rect x="4" y="13" width="16" height="2.5" rx="1.25" />
       <rect x="6" y="18" width="12" height="2.5" rx="1.25" />
@@ -53,7 +56,7 @@ function Fog() {
 
 function CloudRain() {
   return (
-    <svg {...iconSize} viewBox="0 0 24 24" fill="currentColor">
+    <svg {...centredOn(12.72, 15.81)} fill="currentColor">
       <path d="M19 12a4.5 4.5 0 0 0-8.7-1.5H9a3.5 3.5 0 1 0 0 7h10A4.5 4.5 0 0 0 19 12z" />
       <rect x="8" y="20" width="2" height="3" rx="1" />
       <rect x="12" y="21" width="2" height="3" rx="1" />
@@ -64,7 +67,7 @@ function CloudRain() {
 
 function CloudDrizzle() {
   return (
-    <svg {...iconSize} viewBox="0 0 24 24" fill="currentColor">
+    <svg {...centredOn(12.72, 15.31)} fill="currentColor">
       <path d="M19 12a4.5 4.5 0 0 0-8.7-1.5H9a3.5 3.5 0 1 0 0 7h10A4.5 4.5 0 0 0 19 12z" />
       <circle cx="9" cy="20.5" r="1" />
       <circle cx="13" cy="22" r="1" />
@@ -75,7 +78,7 @@ function CloudDrizzle() {
 
 function CloudSnow() {
   return (
-    <svg {...iconSize} viewBox="0 0 24 24" fill="currentColor">
+    <svg {...centredOn(12.72, 15.91)} fill="currentColor">
       <path d="M19 12a4.5 4.5 0 0 0-8.7-1.5H9a3.5 3.5 0 1 0 0 7h10A4.5 4.5 0 0 0 19 12z" />
       <circle cx="9" cy="20" r="1.2" />
       <circle cx="15" cy="20" r="1.2" />
@@ -86,7 +89,7 @@ function CloudSnow() {
 
 function Snowflake() {
   return (
-    <svg {...iconSize} viewBox="0 0 24 24" fill="currentColor">
+    <svg {...centredOn(11.5, 12)} fill="currentColor">
       <rect x="11" y="2" width="2" height="20" rx="1" />
       <rect x="2" y="11" width="20" height="2" rx="1" />
       <rect x="4.93" y="4.22" width="2" height="16" rx="1" transform="rotate(45 5.93 12.22)" />
@@ -97,7 +100,7 @@ function Snowflake() {
 
 function CloudLightning() {
   return (
-    <svg {...iconSize} viewBox="0 0 24 24" fill="currentColor">
+    <svg {...centredOn(12.72, 17.81)} fill="currentColor">
       <path d="M19 12a4.5 4.5 0 0 0-8.7-1.5H9a3.5 3.5 0 1 0 0 7h10A4.5 4.5 0 0 0 19 12z" />
       <path d="M13 19l-2 4h3l-2 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>
@@ -165,40 +168,4 @@ export function useNottingham() {
   }, []);
 
   return { time, weather };
-}
-
-export default function Header() {
-  const { time, weather } = useNottingham();
-
-  return (
-    <header className="flex items-end sm:items-center justify-between py-6">
-      <div className="flex gap-3 flex-col items-start sm:flex-row sm:items-center">
-        <div className="glass-poster relative" style={{ borderRadius: 4, overflow: "hidden", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)" }}>
-          <Image
-            src="/images/avatar.png"
-            alt="George Wood"
-            width={60}
-            height={60}
-            className="sm:w-[60px] sm:h-[60px] w-[32px] h-[32px] block"
-          />
-        </div>
-        <div>
-          <p className="font-semibold text-sm leading-tight">George Wood</p>
-          <p className="text-sm opacity-80 leading-tight">Product Designer at Stripe</p>
-        </div>
-      </div>
-      <div className="text-right text-sm lg:mr-[52px]">
-        <p className="leading-tight">Nottingham, UK</p>
-        <p className="opacity-80 leading-tight flex items-center justify-end gap-1">
-          <span>{time}</span>
-          {weather && (
-            <>
-              <span>—— {weather.temp}°C</span>
-              <span style={{ marginTop: -1 }}>{(() => { const Icon = WEATHER_ICONS[weather.type]; return <Icon />; })()}</span>
-            </>
-          )}
-        </p>
-      </div>
-    </header>
-  );
 }
