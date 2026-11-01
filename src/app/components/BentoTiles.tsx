@@ -90,7 +90,7 @@ export function IntroTile({ index }: { index: number }) {
         </p>
         <div className="mt-8 grid sm:grid-cols-2 gap-4 text-sm leading-normal opacity-80">
           <p>
-            I previously spent over 15 years working in agencies, mainly specialising in designing ecommerce platforms and the tools that let brands build and curate campaigns their own way.
+            I previously spent over 15 years working in agencies, specialising in designing ecommerce platforms and the tools that let brands build and curate campaigns their own way.
           </p>
           <p>
             Across all of that, what’s stayed consistent is a focus on the people actually using the thing – and a habit of noticing the small stuff that’s easy to overlook but ends up mattering.

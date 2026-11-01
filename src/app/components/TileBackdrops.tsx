@@ -339,13 +339,16 @@ export function DotGrid() {
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true" />;
 }
 
-// A slow wash through the colour swatches, previewing what they do
+// A wash through the colourful swatches, previewing what they do. The blue, black and white
+// swatches are left out: blue matches the default background, and black and white overpowered the rest.
+const DRIFT_COLOURS = PRESETS.slice(3);
+
 export function ColourDrift() {
   return (
     <div
       className="colour-drift"
       aria-hidden="true"
-      style={{ backgroundImage: `linear-gradient(110deg, ${[...PRESETS, PRESETS[0]].join(", ")})` }}
+      style={{ backgroundImage: `linear-gradient(110deg, ${[...DRIFT_COLOURS, DRIFT_COLOURS[0]].join(", ")})` }}
     />
   );
 }

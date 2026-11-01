@@ -187,7 +187,7 @@ html[data-cursor-trail="true"] [role="button"] {
   inset: 0;
   pointer-events: none;
   background-size: 400% 100%;
-  opacity: calc(0.2 * var(--wave-intensity, 1));
+  opacity: calc(0.45 * var(--wave-intensity, 1));
   mask-image: linear-gradient(to top, black, transparent 85%);
   animation: colour-drift 12s ease-in-out infinite alternate;
 }
