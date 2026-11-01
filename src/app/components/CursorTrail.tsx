@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { hexToRgb, onRootVarsChange, rootVar } from "./rootVars";
 
 interface Ghost {
   x: number;
@@ -16,15 +17,9 @@ export default function CursorTrail() {
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
-    const read = () => {
-      const v = Number(
-        getComputedStyle(document.documentElement).getPropertyValue("--cursor-trail") || "0"
-      );
-      setEnabled(v > 0);
-    };
+    const read = () => setEnabled(Number(rootVar("--cursor-trail") || "0") > 0);
     read();
-    const id = setInterval(read, 200);
-    return () => clearInterval(id);
+    return onRootVarsChange(read);
   }, []);
 
   useEffect(() => {
@@ -65,12 +60,7 @@ export default function CursorTrail() {
         ghostsRef.current = ghostsRef.current.slice(-12);
       }
 
-      const textColor = getComputedStyle(document.documentElement)
-        .getPropertyValue("--text-color")
-        .trim() || "#ffffff";
-      const r = parseInt(textColor.slice(1, 3), 16);
-      const g = parseInt(textColor.slice(3, 5), 16);
-      const b = parseInt(textColor.slice(5, 7), 16);
+      const rgb = hexToRgb(rootVar("--text-color"));
 
       for (let i = ghostsRef.current.length - 1; i >= 0; i--) {
         const ghost = ghostsRef.current[i];
@@ -84,7 +74,7 @@ export default function CursorTrail() {
         const alpha = life * 0.3;
         ctx.beginPath();
         ctx.arc(ghost.x, ghost.y, size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        ctx.fillStyle = `rgba(${rgb}, ${alpha})`;
         ctx.fill();
       }
 

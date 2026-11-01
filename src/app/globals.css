@@ -8,10 +8,10 @@
   --svg-invert: 0;
   --border-color: rgba(255, 255, 255, 0.2);
   --noise-opacity: 0.2;
-  --noise-speed: 5;
+  --noise-speed: 0;
   --wave-intensity: 1;
   --cursor-trail: 0;
-  /* Inter alternates: a tailed l and rounded quotes; the control panel swaps these per typeface */
+  /* Inter alternates (a tailed l and rounded quotes); the control panel swaps these per typeface */
   --active-features: "cv05", "ss03";
 }
 

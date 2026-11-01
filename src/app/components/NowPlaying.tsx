@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { hexToRgb } from "./TileBackdrops";
+import { canvasDpr, hexToRgb, onRootVarsChange, rootVar } from "./rootVars";
 
 export interface Track {
   title: string;
@@ -35,29 +35,14 @@ export function SoundWaves() {
   const animRef = useRef<number>(0);
   const offsetsRef = useRef<Float32Array | null>(null);
   const sizeRef = useRef({ w: 0, h: 0 });
-  const styleCache = useRef({ intensity: 1, fill: "rgba(255,255,255,0.1)", lastRead: 0 });
 
-  const animate = useCallback(() => {
+  const draw = useCallback((now: number) => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
+    const ctx = canvas?.getContext("2d");
     const { w, h } = sizeRef.current;
-    if (w === 0 || h === 0) {
-      animRef.current = requestAnimationFrame(animate);
-      return;
-    }
+    if (!ctx || w === 0 || h === 0) return;
 
-    const now = performance.now();
-    const sc = styleCache.current;
-    if (now - sc.lastRead > 100) {
-      const styles = getComputedStyle(document.documentElement);
-      sc.intensity = Number(styles.getPropertyValue("--wave-intensity")) || 1;
-      sc.fill = `rgba(${hexToRgb(styles.getPropertyValue("--text-color"))}, ${0.1 * sc.intensity})`;
-      sc.lastRead = now;
-    }
-
+    const intensity = Number(rootVar("--wave-intensity")) || 0;
     const barWidth = 2;
     const gap = 2;
     const step = barWidth + gap;
@@ -73,11 +58,9 @@ export function SoundWaves() {
     const offsets = offsetsRef.current;
 
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = sc.fill;
-    const intensity = sc.intensity;
+    ctx.fillStyle = `rgba(${hexToRgb(rootVar("--text-color"))}, ${0.1 * intensity})`;
 
     for (let i = 0; i < count; i++) {
-      const x = i * step;
       const o = offsets[i];
       const speed1 = 1.4 + Math.sin(o * 3.7) * 0.6;
       const speed2 = 2.1 + Math.cos(o * 5.3) * 0.8;
@@ -86,39 +69,49 @@ export function SoundWaves() {
       const v2 = Math.sin(t * speed2 + o * 2.3 + 1.7) * 0.3;
       const v3 = Math.sin(t * speed3 + o * 0.7 + 4.2) * 0.2;
       const baseHeight = 0.08 + Math.sin(o * 11.3) * 0.04;
-      const combined = baseHeight + Math.abs(v1 + v2 + v3);
-      const barHeight = Math.max(1, combined * h * intensity);
-      const y = h - barHeight;
-      ctx.beginPath();
-      ctx.roundRect(x, y, barWidth, barHeight, 1);
-      ctx.fill();
+      const barHeight = Math.max(1, (baseHeight + Math.abs(v1 + v2 + v3)) * h * intensity);
+      ctx.fillRect(i * step, h - barHeight, barWidth, barHeight);
     }
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    animRef.current = requestAnimationFrame(animate);
   }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let visible = true;
+    const loop = (now: number) => {
+      draw(now);
+      if (visible && !still) animRef.current = requestAnimationFrame(loop);
+    };
+
     const ro = new ResizeObserver((entries) => {
+      const dpr = canvasDpr();
       const { width, height } = entries[0].contentRect;
       canvas.width = width * dpr;
       canvas.height = height * dpr;
-      const ctx = canvas.getContext("2d");
-      if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      canvas.getContext("2d")?.setTransform(dpr, 0, 0, dpr, 0, 0);
       sizeRef.current = { w: width, h: height };
+      draw(performance.now());
     });
     ro.observe(canvas);
 
-    animRef.current = requestAnimationFrame(animate);
+    // Pause while the tile is off screen
+    const io = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      cancelAnimationFrame(animRef.current);
+      if (visible && !still) animRef.current = requestAnimationFrame(loop);
+    });
+    io.observe(canvas);
+
+    const offRootVars = onRootVarsChange(() => draw(performance.now()));
     return () => {
       ro.disconnect();
+      io.disconnect();
+      offRootVars();
       cancelAnimationFrame(animRef.current);
     };
-  }, [animate]);
+  }, [draw]);
 
   return (
     <canvas

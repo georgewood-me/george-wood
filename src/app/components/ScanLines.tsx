@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { canvasDpr, onRootVarsChange, rootVar } from "./rootVars";
 
 export default function ScanLines() {
   const [intensity, setIntensity] = useState(0);
@@ -9,14 +10,9 @@ export default function ScanLines() {
   const sizeRef = useRef({ w: 0, h: 0 });
 
   useEffect(() => {
-    const read = () => {
-      setIntensity(
-        Number(getComputedStyle(document.documentElement).getPropertyValue("--scanlines") || "0")
-      );
-    };
+    const read = () => setIntensity(Number(rootVar("--scanlines") || "0"));
     read();
-    const id = setInterval(read, 200);
-    return () => clearInterval(id);
+    return onRootVarsChange(read);
   }, []);
 
   const animate = useCallback((now: number) => {
@@ -31,12 +27,7 @@ export default function ScanLines() {
       return;
     }
 
-    const t = Number(getComputedStyle(document.documentElement).getPropertyValue("--scanlines") || "0") / 100;
-    if (t === 0) {
-      ctx.clearRect(0, 0, w, h);
-      animRef.current = requestAnimationFrame(animate);
-      return;
-    }
+    const t = Number(rootVar("--scanlines") || "0") / 100;
 
     ctx.clearRect(0, 0, w, h);
 
@@ -82,11 +73,12 @@ export default function ScanLines() {
     animRef.current = requestAnimationFrame(animate);
   }, []);
 
+  // Only run while scanlines are switched on
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || intensity === 0) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = canvasDpr();
     const resize = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
@@ -104,7 +96,7 @@ export default function ScanLines() {
       window.removeEventListener("resize", resize);
       cancelAnimationFrame(animRef.current);
     };
-  }, [animate]);
+  }, [animate, intensity > 0]);
 
   return (
     <canvas

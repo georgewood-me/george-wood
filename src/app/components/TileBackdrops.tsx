@@ -3,22 +3,15 @@
 import { useEffect, useRef } from "react";
 import { PRESETS } from "./ControlPanel";
 import type { WeatherType } from "./Weather";
+import { canvasDpr, hexToRgb, onRootVarsChange, rootVar } from "./rootVars";
 
 // Background layers for tiles. Like the sound waves, they draw in the text colour at low
 // opacity, scale with the Motion slider (--wave-intensity) and hold still for reduced motion.
 
-// "#fff" or "#ffffff" to "255, 255, 255"; the stylesheet build shortens hex colours
-export function hexToRgb(color: string) {
-  let hex = color.trim().replace("#", "") || "ffffff";
-  if (hex.length === 3) hex = [...hex].map((c) => c + c).join("");
-  return `${parseInt(hex.slice(0, 2), 16)}, ${parseInt(hex.slice(2, 4), 16)}, ${parseInt(hex.slice(4, 6), 16)}`;
-}
-
 function readInk() {
-  const styles = getComputedStyle(document.documentElement);
   return {
-    rgb: hexToRgb(styles.getPropertyValue("--text-color")),
-    intensity: Number(styles.getPropertyValue("--wave-intensity")) || 0,
+    rgb: hexToRgb(rootVar("--text-color")),
+    intensity: Number(rootVar("--wave-intensity")) || 0,
   };
 }
 
@@ -43,18 +36,12 @@ function useTileCanvas(
     let h = 0;
     let frame = 0;
     let visible = true;
-    let ink = readInk();
-    let inkReadAt = 0;
     const start = performance.now();
     const still = !animate || prefersReducedMotion();
 
     const render = (now: number) => {
-      if (now - inkReadAt > 200) {
-        ink = readInk();
-        inkReadAt = now;
-      }
       ctx.clearRect(0, 0, w, h);
-      if (w && h) drawRef.current(ctx, w, h, still ? 0 : (now - start) / 1000, ink);
+      if (w && h) drawRef.current(ctx, w, h, still ? 0 : (now - start) / 1000, readInk());
     };
 
     const loop = (now: number) => {
@@ -63,7 +50,7 @@ function useTileCanvas(
     };
 
     const resize = new ResizeObserver(([entry]) => {
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = canvasDpr();
       w = entry.contentRect.width;
       h = entry.contentRect.height;
       canvas.width = w * dpr;
@@ -72,6 +59,8 @@ function useTileCanvas(
       render(performance.now());
     });
     resize.observe(canvas);
+    // Redraw a still frame when the colour or Motion changes
+    const offRootVars = onRootVarsChange(() => render(performance.now()));
 
     const onScreen = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
@@ -83,6 +72,7 @@ function useTileCanvas(
     return () => {
       resize.disconnect();
       onScreen.disconnect();
+      offRootVars();
       cancelAnimationFrame(frame);
     };
   }, [animate]);
@@ -96,16 +86,35 @@ const seeded = (i: number, salt: number) => {
   return x - Math.floor(x);
 };
 
+// Small cache of pre-rendered images, so soft gradients are built once rather than every frame
+const sprites = new Map<string, HTMLCanvasElement>();
+function sprite(key: string, w: number, h: number, paint: (ctx: CanvasRenderingContext2D) => void) {
+  let image = sprites.get(key);
+  if (!image) {
+    image = document.createElement("canvas");
+    image.width = Math.ceil(w * 2);
+    image.height = Math.ceil(h * 2);
+    const ctx = image.getContext("2d")!;
+    ctx.scale(2, 2);
+    paint(ctx);
+    if (sprites.size > 120) sprites.delete(sprites.keys().next().value!);
+    sprites.set(key, image);
+  }
+  return image;
+}
+
 // A soft round puff: full strength in the middle, fading to nothing at the edge
 function puff(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, rgb: string, a: number) {
-  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-  g.addColorStop(0, `rgba(${rgb}, ${a})`);
-  g.addColorStop(0.55, `rgba(${rgb}, ${a * 0.55})`);
-  g.addColorStop(1, `rgba(${rgb}, 0)`);
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.fill();
+  const size = Math.max(1, Math.round(r));
+  const image = sprite(`puff|${size}|${rgb}|${a.toFixed(3)}`, size * 2, size * 2, (c) => {
+    const g = c.createRadialGradient(size, size, 0, size, size, size);
+    g.addColorStop(0, `rgba(${rgb}, ${a})`);
+    g.addColorStop(0.55, `rgba(${rgb}, ${a * 0.55})`);
+    g.addColorStop(1, `rgba(${rgb}, 0)`);
+    c.fillStyle = g;
+    c.fillRect(0, 0, size * 2, size * 2);
+  });
+  ctx.drawImage(image, x - r, y - r, r * 2, r * 2);
 }
 
 // Each cloud is a cluster of overlapping puffs; overlaps build up into a denser middle
@@ -175,7 +184,15 @@ function drawFall(ctx: CanvasRenderingContext2D, w: number, h: number, t: number
 
 // The sun: a clear disc with a soft edge, a halo around it, and a wide glow that breathes slowly
 function drawSun(ctx: CanvasRenderingContext2D, w: number, h: number, t: number, rgb: string, alpha: number) {
-  const breath = 1 + Math.sin(t * 0.6) * 0.05;
+  // The breathing is stepped into twelve cached frames; the change between them is too small to see
+  const step = Math.round(((Math.sin(t * 0.6) + 1) / 2) * 11);
+  const image = sprite(`sun|${Math.round(w)}|${Math.round(h)}|${rgb}|${alpha.toFixed(3)}|${step}`, w, h, (c) =>
+    paintSun(c, w, h, 1 + (step / 11 - 0.5) * 0.1, rgb, alpha),
+  );
+  ctx.drawImage(image, 0, 0, w, h);
+}
+
+function paintSun(ctx: CanvasRenderingContext2D, w: number, h: number, breath: number, rgb: string, alpha: number) {
   const x = w * 0.76;
   const y = h * 0.3;
   const r = Math.min(w, h) * 0.17;
@@ -253,6 +270,7 @@ export function DotGrid() {
     const draw = () => {
       const { rgb, intensity } = readInk();
       ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = `rgba(${rgb}, ${0.15 * intensity})`;
       for (let y = gap / 2; y < h; y += gap) {
         for (let x = gap / 2; x < w; x += gap) {
           const dx = p.x - x;
@@ -293,7 +311,7 @@ export function DotGrid() {
     };
 
     const resize = new ResizeObserver(([entry]) => {
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = canvasDpr();
       w = entry.contentRect.width;
       h = entry.contentRect.height;
       canvas.width = w * dpr;
@@ -308,13 +326,13 @@ export function DotGrid() {
       tile.addEventListener("pointerleave", onLeave);
     }
     // Redraw when the colour or Motion slider changes
-    window.addEventListener("controls:change", draw);
+    const offRootVars = onRootVarsChange(draw);
     return () => {
       resize.disconnect();
       cancelAnimationFrame(frame);
       tile.removeEventListener("pointermove", onMove);
       tile.removeEventListener("pointerleave", onLeave);
-      window.removeEventListener("controls:change", draw);
+      offRootVars();
     };
   }, []);
 
