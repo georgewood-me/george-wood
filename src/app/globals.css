@@ -196,3 +196,20 @@ html[data-cursor-trail="true"] [role="button"] {
   from { background-position: 0% 50%; }
   to { background-position: 100% 50%; }
 }
+
+/* Edges for images. A normal border sits outside the image, so a translucent border mixes with
+   the page behind it into a muddy line. This draws a faint line over the image's own outer pixels
+   instead, lightening dark images and darkening light ones slightly, and uses the text colour so it
+   follows any background a visitor picks. */
+.image-edge {
+  position: relative;
+}
+
+.image-edge::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-color) 15%, transparent);
+  pointer-events: none;
+}

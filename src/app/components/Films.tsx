@@ -47,8 +47,7 @@ export function FilmCard({ film }: { film: Film }) {
   return (
     <a href={film.url} target="_blank" rel="noopener noreferrer" className="group">
       <div
-        className="glass-poster aspect-2/3 rounded-[4px] overflow-hidden mb-2 relative"
-        style={{ border: "1px solid var(--border-color)" }}
+        className="glass-poster image-edge aspect-2/3 rounded-[4px] overflow-hidden mb-2"
       >
         <img src={film.poster} alt={film.title} className="w-full h-full object-cover absolute inset-0" />
         <div

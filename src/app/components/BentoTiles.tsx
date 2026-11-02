@@ -42,7 +42,7 @@ function Tile({
 function Identity() {
   return (
     <div className="flex items-center gap-3">
-      <div className="glass-poster relative" style={{ borderRadius: 4, overflow: "hidden", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)" }}>
+      <div className="glass-poster image-edge" style={{ borderRadius: 4, overflow: "hidden", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)" }}>
         <Image src="/images/avatar.png" alt="George Wood" width={40} height={40} className="block" />
       </div>
       <div>
@@ -107,8 +107,7 @@ export function NowPlayingTile({ index }: { index: number }) {
     <Tile index={index} label={track?.nowPlaying ? "Listening to" : "Last played"} className="col-span-1 min-h-60">
       <div className="relative z-10 mt-auto pt-4">
         <div
-          className="w-14 h-14 rounded-[4px] overflow-hidden flex items-center justify-center"
-          style={{ border: "1px solid var(--border-color)" }}
+          className="image-edge w-14 h-14 rounded-[4px] overflow-hidden flex items-center justify-center"
         >
           {track?.imageLarge ? (
             <img src={track.imageLarge} alt="" className="w-full h-full object-cover" />
