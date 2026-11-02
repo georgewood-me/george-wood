@@ -75,7 +75,7 @@ export function PageHeader() {
       <div className="absolute inset-x-0 top-0 h-20 flex items-center px-5 pointer-events-none">
         <div
           aria-hidden="true"
-          className="frost absolute inset-0 border-b border-r transition-opacity duration-300 ease-out"
+          className="frost header-frost absolute inset-0 border-b border-r transition-opacity duration-300 ease-out"
           style={{ opacity: scrolled ? 1 : 0 }}
         />
         <div className="relative">

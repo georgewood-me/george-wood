@@ -357,3 +357,21 @@ html[data-cursor-trail="true"] [role="button"] {
   50% { fill: #06ca1d; }
   75% { fill: #ca06ca; }
 }
+
+/* While the container fills the screen, its right-hand hairlines would sit on the screen edge.
+   The grid runs 1px wider than the container, so those lines fall just outside it and get clipped. */
+@media (max-width: 1120px) {
+  .content-container {
+    overflow-x: clip;
+    /* And the left border the container position adds */
+    --container-bl: none;
+  }
+
+  .content-container > main {
+    margin-right: -1px;
+  }
+
+  .header-frost {
+    border-right-width: 0;
+  }
+}
