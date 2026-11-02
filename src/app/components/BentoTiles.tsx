@@ -92,7 +92,7 @@ export function IntroTile({ index }: { index: number }) {
       <div className="h-10" aria-hidden="true" />
       <div className="mt-auto pt-10 sm:pt-16">
         <p className="text-2xl sm:text-[28px] font-medium leading-[1.2] text-balance" style={{ letterSpacing: "-0.02em" }}>
-          I’m a Product Designer at Stripe working in Extensibility, helping to shape how developers and users extend our platform with apps and extensions.
+          I work in Extensibility at Stripe, helping to shape how developers and users extend our platform with apps and extensions.
         </p>
         <div className="mt-8 grid sm:grid-cols-2 gap-4 text-sm leading-normal opacity-80">
           <p>
