@@ -278,3 +278,82 @@ html[data-cursor-trail="true"] [role="button"] {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-color) 15%, transparent);
   pointer-events: none;
 }
+
+/* Animated marks before the tile labels */
+.label-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.on-air {
+  width: 7px;
+  height: 7px;
+  margin: 0 2.5px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text-color) 25%, transparent);
+  transition: background-color 0.4s, box-shadow 0.4s;
+}
+
+.on-air-live {
+  background: var(--text-color);
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--text-color) 70%, transparent);
+  animation: on-air 2.4s ease-in-out infinite;
+}
+
+@keyframes on-air {
+  50% { opacity: 0.5; box-shadow: 0 0 2px 0 color-mix(in srgb, var(--text-color) 40%, transparent); }
+}
+
+.radar-ring {
+  transform-origin: 12px 12px;
+  transform: scale(0.3);
+  opacity: 0;
+  animation: radar 2.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+
+.radar-ring-late {
+  animation-delay: 1.4s;
+}
+
+@keyframes radar {
+  0% { transform: scale(0.3); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+.waving-hand {
+  transform-origin: 70% 90%;
+  animation: wave 4s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0%, 30%, 100% { transform: rotate(0deg); }
+  6% { transform: rotate(16deg); }
+  12% { transform: rotate(-8deg); }
+  18% { transform: rotate(14deg); }
+  24% { transform: rotate(-4deg); }
+}
+
+.paintbrush {
+  transform-origin: 20% 80%;
+  animation: brush-dab 3s ease-in-out infinite;
+}
+
+.paintbrush-tip {
+  animation: brush-colour 12s steps(1) infinite;
+}
+
+@keyframes brush-dab {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-10deg) translate(-1px, 1px); }
+}
+
+/* Moves to the next colour each time the brush lifts */
+@keyframes brush-colour {
+  0% { fill: #e50000; }
+  25% { fill: #e28c00; }
+  50% { fill: #06ca1d; }
+  75% { fill: #ca06ca; }
+}

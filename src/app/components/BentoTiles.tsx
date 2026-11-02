@@ -9,15 +9,18 @@ import { testimonials } from "./testimonials";
 import { FilmCard, useRecentFilms } from "./Films";
 import { PRESETS } from "./ControlPanel";
 import { WeatherBackdrop, DotGrid, ColourDrift } from "./TileBackdrops";
+import { OnAirLight, Paintbrush, RadarPing, WavingHand } from "./LabelIcons";
 
 function Tile({
   label,
+  icon,
   aside,
   index,
   className = "",
   children,
 }: {
   label?: string;
+  icon?: ReactNode;
   aside?: ReactNode;
   index: number;
   className?: string;
@@ -30,7 +33,10 @@ function Tile({
     >
       {label && (
         <div className="relative flex items-center justify-between min-h-6">
-          <span className="tile-label">{label}</span>
+          <span className="flex items-center gap-2">
+            {icon}
+            <span className="tile-label">{label}</span>
+          </span>
           {aside}
         </div>
       )}
@@ -104,7 +110,7 @@ export function IntroTile({ index }: { index: number }) {
 export function NowPlayingTile({ index }: { index: number }) {
   const track = useRecentTrack();
   return (
-    <Tile index={index} label={track?.nowPlaying ? "Listening to" : "Last played"} className="col-span-1 min-h-60">
+    <Tile index={index} label={track?.nowPlaying ? "Listening to" : "Last played"} icon={<OnAirLight live={!!track?.nowPlaying} />} className="col-span-1 min-h-60">
       <div className="relative z-10 mt-auto pt-4">
         <div
           className="image-edge w-14 h-14 rounded-[4px] overflow-hidden flex items-center justify-center"
@@ -132,7 +138,7 @@ export function ClockTile({ index }: { index: number }) {
   const { time, weather } = useNottingham();
   const Icon = weather ? WEATHER_ICONS[weather.type] : null;
   return (
-    <Tile index={index} label="Nottingham, UK" className="col-span-1 min-h-60 overflow-hidden">
+    <Tile index={index} label="Nottingham, UK" icon={<RadarPing />} className="col-span-1 min-h-60 overflow-hidden">
       <WeatherBackdrop type={weather?.type ?? null} />
       <div className="relative mt-auto">
         <p className="text-[40px] min-[375px]:text-[44px] sm:text-5xl font-medium leading-none tabular-nums" style={{ letterSpacing: "-0.03em" }}>
@@ -160,7 +166,7 @@ const contactLinks = [
 
 export function ContactTile({ index }: { index: number }) {
   return (
-    <Tile index={index} label="Say hello" className="col-span-2 sm:col-span-1">
+    <Tile index={index} label="Say hello" icon={<WavingHand />} className="col-span-2 sm:col-span-1">
       <DotGrid />
       <ul className="relative mt-auto pt-4">
         {contactLinks.map((link) => (
@@ -189,7 +195,7 @@ export function MakeItYoursTile({ index }: { index: number }) {
   }, []);
 
   return (
-    <Tile index={index} label="Make it yours" className="col-span-2 sm:col-span-1 overflow-hidden">
+    <Tile index={index} label="Make it yours" icon={<Paintbrush />} className="col-span-2 sm:col-span-1 overflow-hidden">
       <ColourDrift />
       <p className="relative mt-4 text-sm leading-normal opacity-80">
         Change the colour, texture and type, then share your version
