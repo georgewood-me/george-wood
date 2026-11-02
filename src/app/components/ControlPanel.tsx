@@ -395,8 +395,13 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
           })}
         </div>
       </div>
+    </>
+  );
 
-      <div className="pt-5 -mx-5 px-5 flex gap-2" style={{ borderTop: "1px solid var(--border-color)" }}>
+  // The action bar stays pinned to the bottom of the panel; only the settings above it scroll
+  const panelFooter = (
+    <>
+      <div className={`shrink-0 flex gap-2 px-5 pt-5 ${isMobile ? "pb-8" : "pb-5"}`} style={{ borderTop: "1px solid var(--border-color)" }}>
         <button
           onClick={randomize}
           className="glass-btn flex-1 h-9 flex items-center justify-center gap-1.5 rounded-[4px] opacity-60 hover:opacity-100"
@@ -539,8 +544,8 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
             ref={panelRef}
             className={
               isMobile
-                ? "glass-surface fixed bottom-0 left-0 right-0 z-60 px-5 pt-2 pb-8 text-xs"
-                : "glass-surface fixed z-60 w-[350px] p-5 text-xs rounded-[4px]"
+                ? "glass-surface fixed bottom-0 left-0 right-0 z-60 flex flex-col overflow-hidden text-xs"
+                : "glass-surface fixed z-60 w-[350px] flex flex-col overflow-hidden text-xs rounded-[4px]"
             }
             style={{
               color: "var(--text-color)",
@@ -559,14 +564,12 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
                     ...(!flat ? {} : { borderTop: "1px solid var(--border-color)" }),
                     borderRadius: "12px 12px 0 0",
                     maxHeight: "85vh",
-                    overflowY: "auto" as const,
                   }
                 : {
                     ...(!flat ? {} : { border: "1px solid var(--border-color)" }),
                     top: isDesktop ? desktopTop + 48 : 68,
                     // Scroll rather than run off shorter screens, e.g. with the colour picker open
                     maxHeight: `calc(100vh - ${(isDesktop ? desktopTop + 48 : 68) + 20}px)`,
-                    overflowY: "auto" as const,
                     right: isDesktop ? "auto" : 16,
                     ...(isDesktop
                       ? {
@@ -576,6 +579,7 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
                   }),
             }}
           >
+            <div className={`min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 ${isMobile ? "pt-2" : "pt-5"}`}>
             <div className={`${isMobile ? "mb-5 mt-2" : "mb-5"} flex items-center justify-between`}>
               <span className="tile-label">Make it yours</span>
               <div className="flex gap-1.5">
@@ -594,6 +598,9 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
             </div>
 
             {panelContent}
+            </div>
+
+            {panelFooter}
           </div>
         </>
       )}
