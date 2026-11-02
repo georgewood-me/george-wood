@@ -198,7 +198,7 @@ export function MakeItYoursTile({ index }: { index: number }) {
     <Tile index={index} label="Make it yours" icon={<Paintbrush />} className="col-span-2 sm:col-span-1 overflow-hidden">
       <ColourDrift />
       <p className="relative mt-4 text-sm leading-normal opacity-80">
-        Change the colour, texture and type, then share your version
+        Redesign my site. I won’t take it personally.
       </p>
       <div className="relative mt-auto pt-6 grid grid-cols-8 gap-2">
         {PRESETS.map((color) => (

@@ -163,12 +163,16 @@ html[data-cursor-trail="true"] [role="button"] {
   height: 8px;
   border-radius: 4px;
   background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+  /* The same inset edge as .image-edge, so a hue that matches the page doesn't disappear into it */
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-color) 15%, transparent);
 }
 
 .hue-slider::-moz-range-track {
   height: 8px;
   border-radius: 4px;
   background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+  /* The same inset edge as .image-edge, so a hue that matches the page doesn't disappear into it */
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-color) 15%, transparent);
 }
 
 .hue-slider::-webkit-slider-thumb {
