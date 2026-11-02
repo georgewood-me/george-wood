@@ -68,6 +68,18 @@ html[data-cursor-trail="true"] [role="button"] {
   from { opacity: 0; transform: translateY(8px); }
 }
 
+/* Tile hairlines. Each tile draws its right and bottom edges as a line over itself, rather than
+   leaving a gap that shows the page behind. Over a plain tile that looks the same; over the colour
+   drift, weather or waves the line takes on the colour beneath it instead of sitting beside it. */
+.bento-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset -1px -1px 0 var(--border-color);
+  pointer-events: none;
+  z-index: 1;
+}
+
 .bento-tile > * {
   animation: tile-in 500ms cubic-bezier(0.25, 1, 0.5, 1) var(--tile-delay, 0ms) both;
 }
@@ -81,20 +93,31 @@ html[data-cursor-trail="true"] [role="button"] {
     margin-left: var(--container-ml, 0);
     margin-right: var(--container-mr, auto);
     border-left: var(--container-bl, none);
-    border-right: var(--container-br, 1px solid var(--border-color));
   }
 
 }
 
-/* Flat defaults */
+/* Sliders: a 32px-tall hit area so they're easy to grab on phones, with the 1px line drawn
+   in the middle of it as the track */
 .control-slider {
   -webkit-appearance: none;
   appearance: none;
+  display: block;
   width: 100%;
-  height: 1px;
-  background: var(--border-color);
+  height: 32px;
+  background: transparent;
   outline: none;
   cursor: pointer;
+}
+
+.control-slider::-webkit-slider-runnable-track {
+  height: 1px;
+  background: var(--border-color);
+}
+
+.control-slider::-moz-range-track {
+  height: 1px;
+  background: var(--border-color);
 }
 
 .control-slider::-webkit-slider-thumb {
@@ -102,6 +125,7 @@ html[data-cursor-trail="true"] [role="button"] {
   appearance: none;
   width: 16px;
   height: 16px;
+  margin-top: -7.5px;
   border-radius: 50%;
   background: var(--text-color);
   border: none;
@@ -117,17 +141,58 @@ html[data-cursor-trail="true"] [role="button"] {
   cursor: pointer;
 }
 
+.control-slider:focus-visible::-webkit-slider-thumb {
+  outline: 1px solid var(--text-color);
+  outline-offset: 2px;
+}
+
 @media (max-width: 1023px) {
   .control-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
     width: 22px;
     height: 22px;
+    margin-top: -10.5px;
   }
   .control-slider::-moz-range-thumb {
     width: 22px;
     height: 22px;
   }
+}
+
+/* The colour picker's hue slider: same hit area and thumb as the others, with a rainbow track */
+.hue-slider::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+}
+
+.hue-slider::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+}
+
+.hue-slider::-webkit-slider-thumb {
+  margin-top: -4px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.hue-slider::-moz-range-thumb {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 1023px) {
+  .hue-slider::-webkit-slider-thumb {
+    margin-top: -7px;
+  }
+}
+
+/* Slider readouts, set in the same mono as the tile labels */
+.panel-value {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  font-feature-settings: normal;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
 }
 
 .glass-btn {

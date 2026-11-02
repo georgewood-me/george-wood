@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import ColourPicker from "./ColourPicker";
 
 export const PRESETS = ["#0038FF", "#000000", "#FFFFFF", "#E50000", "#E28C00", "#06CA1D", "#06BDCA", "#CA06CA"];
 
@@ -58,21 +59,23 @@ function Slider({
   suffix?: string;
 }) {
   return (
-    <div className="mb-3">
-      <div className="flex justify-between mb-0.5">
+    <div>
+      <div className="flex items-baseline justify-between">
         <span>{label}</span>
-        <span className="opacity-60">
+        <span className="panel-value">
           {value}
           {suffix}
         </span>
       </div>
+      {/* The line sits 12px under the label, clear of the thumb; the rest of the 32px hit area overlaps the gaps */}
       <input
         type="range"
         min={min}
         max={max}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="control-slider"
+        className="control-slider -mt-1 -mb-4"
+        aria-label={label}
       />
     </div>
   );
@@ -92,6 +95,7 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
   const [font, setFont] = useState("inter");
   const [align, setAlign] = useState<"left" | "center" | "right">("left");
   const [finish, setFinish] = useState<Finish>("flat");
+  const [pickerOpen, setPickerOpen] = useState(false);
   const gloss = finish === "glass";
   const flat = finish === "flat";
   const [toastMounted, setToastMounted] = useState(false);
@@ -214,7 +218,6 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
     root.style.setProperty("--container-ml", ml);
     root.style.setProperty("--container-mr", "0");
     root.style.setProperty("--container-bl", align === "left" ? "none" : borderVal);
-    root.style.setProperty("--container-br", align === "right" ? "none" : borderVal);
     root.setAttribute("data-align", align);
     root.setAttribute("data-gloss", String(gloss));
     document.body.style.background = bg;
@@ -283,11 +286,9 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
 
   const panelContent = (
     <>
-      <div className="mb-4">
-        <div className="flex justify-between mb-1.5">
-          <span>Background</span>
-        </div>
-        <div className="grid grid-cols-9 gap-2.5">
+      <div className="mb-5">
+        <div className="tile-label mb-2">Background</div>
+        <div className="grid grid-cols-9 gap-2">
           {PRESETS.map((color) => (
             <button
               key={color}
@@ -296,37 +297,53 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
               className="glass-swatch aspect-square transition-opacity hover:opacity-80"
               style={{
                 background: color,
-                borderRadius: 3,
+                borderRadius: 4,
                 border: "1px solid var(--border-color)",
                 boxShadow: `0 0 0 2px var(--bg-color), 0 0 0 3px ${bg === color ? `color-mix(in srgb, ${textColor} 60%, transparent)` : "var(--border-color)"}`,
               }}
             />
           ))}
-          <label
-            className="aspect-square cursor-pointer overflow-hidden flex items-center justify-center"
-            style={{ borderRadius: 3, border: "1px solid var(--border-color)" }}
+          <button
+            onClick={() => setPickerOpen((o) => !o)}
+            aria-expanded={pickerOpen}
+            aria-label="Pick a custom colour"
+            className="aspect-square flex items-center justify-center transition-opacity hover:opacity-80"
+            style={{
+              borderRadius: 4,
+              border: "1px solid var(--border-color)",
+              // Ringed like a selected swatch while the picker is open or a custom colour is in use
+              boxShadow: pickerOpen || !PRESETS.includes(bg) ? `0 0 0 2px var(--bg-color), 0 0 0 3px color-mix(in srgb, ${textColor} 60%, transparent)` : undefined,
+            }}
           >
-            <input
-              type="color"
-              value={bg}
-              onChange={(e) => setBg(e.target.value)}
-              className="opacity-0 w-0 h-0 absolute"
-            />
-            <span className="text-lg leading-none opacity-60" style={{ marginTop: -2 }}>+</span>
-          </label>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="opacity-80" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+        </div>
+        {/* Grows open from nothing to its full height and fades in, rather than appearing at once.
+            The inner padding leaves room for the field's thumb at the edges while it's clipped. */}
+        <div
+          className="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"
+          style={{ gridTemplateRows: pickerOpen ? "1fr" : "0fr", opacity: pickerOpen ? 1 : 0 }}
+          inert={!pickerOpen}
+        >
+          <div className="min-h-0 overflow-hidden -mx-2 px-2">
+            <ColourPicker value={bg} onChange={setBg} />
+          </div>
         </div>
       </div>
 
+      <div className="flex flex-col gap-4 mb-5">
       <Slider label="Borders" value={borders} onChange={setBorders} min={0} max={100} suffix="%" />
       <Slider label="Noise" value={noise} onChange={setNoise} min={0} max={80} suffix="%" />
       <Slider label="Noise speed" value={noiseSpeed} onChange={setNoiseSpeed} min={0} max={25} suffix="fps" />
       <Slider label="Motion" value={waves} onChange={setWaves} min={0} max={200} suffix="%" />
       <Slider label="Scanlines" value={scanlines} onChange={setScanlines} min={0} max={100} suffix="%" />
+      </div>
 
-      <div className="mt-4 mb-4">
-        <div className="mb-1.5">
-          <span>Typeface</span>
-        </div>
+      <div className="mb-5">
+        <div className="tile-label mb-2">Typeface</div>
         <div className="grid grid-cols-3 gap-2">
           {FONTS.map((f) => (
             <button
@@ -347,10 +364,8 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
         </div>
       </div>
 
-      <div className="mb-4 hidden lg:block">
-        <div className="mb-1.5">
-          <span>Container</span>
-        </div>
+      <div className="mb-5 hidden lg:block">
+        <div className="tile-label mb-2">Container</div>
         <div className="flex gap-2">
           {(["left", "center", "right"] as const).map((option) => {
             const highlight = option === "left" ? 0 : option === "center" ? 1 : 2;
@@ -381,7 +396,7 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
         </div>
       </div>
 
-      <div className="pt-4 -mx-4 px-4 lg:-mx-4 lg:px-4 flex gap-2" style={{ borderTop: "1px solid var(--border-color)" }}>
+      <div className="pt-5 -mx-5 px-5 flex gap-2" style={{ borderTop: "1px solid var(--border-color)" }}>
         <button
           onClick={randomize}
           className="glass-btn flex-1 h-9 flex items-center justify-center gap-1.5 rounded-[4px] opacity-60 hover:opacity-100"
@@ -525,7 +540,7 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
             className={
               isMobile
                 ? "glass-surface fixed bottom-0 left-0 right-0 z-60 px-5 pt-2 pb-8 text-xs"
-                : "glass-surface fixed z-60 w-[350px] p-4 text-xs rounded-[4px]"
+                : "glass-surface fixed z-60 w-[350px] p-5 text-xs rounded-[4px]"
             }
             style={{
               color: "var(--text-color)",
@@ -549,6 +564,9 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
                 : {
                     ...(!flat ? {} : { border: "1px solid var(--border-color)" }),
                     top: isDesktop ? desktopTop + 48 : 68,
+                    // Scroll rather than run off shorter screens, e.g. with the colour picker open
+                    maxHeight: `calc(100vh - ${(isDesktop ? desktopTop + 48 : 68) + 20}px)`,
+                    overflowY: "auto" as const,
                     right: isDesktop ? "auto" : 16,
                     ...(isDesktop
                       ? {
@@ -558,10 +576,8 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
                   }),
             }}
           >
-            <div className={`${isMobile ? "mb-4 mt-2" : "mb-4"} flex items-center justify-between`}>
-              <span className="font-medium text-xs">
-                Controls
-              </span>
+            <div className={`${isMobile ? "mb-5 mt-2" : "mb-5"} flex items-center justify-between`}>
+              <span className="tile-label">Make it yours</span>
               <div className="flex gap-1.5">
                 {FINISHES.map((f) => (
                   <button
