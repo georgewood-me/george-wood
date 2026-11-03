@@ -241,6 +241,8 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
     setWaves(Math.floor(Math.random() * 200));
     setBorders(5 + Math.floor(Math.random() * 45));
     setScanlines(Math.random() > 0.5 ? Math.floor(Math.random() * 80) : 0);
+    setFont(FONTS[Math.floor(Math.random() * FONTS.length)].name);
+    setFinish(FINISHES[Math.floor(Math.random() * FINISHES.length)].name);
   }
 
   function share() {
@@ -310,7 +312,7 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
           <button
             onClick={() => setPickerOpen((o) => !o)}
             aria-expanded={pickerOpen}
-            aria-label="Pick a custom colour"
+            aria-label={pickerOpen ? "Close the colour picker" : "Pick a custom colour"}
             className="aspect-square flex items-center justify-center transition-opacity hover:opacity-80"
             style={{
               borderRadius: 4,
@@ -319,7 +321,19 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
               boxShadow: pickerOpen || !PRESETS.includes(bg) ? `0 0 0 2px var(--bg-color), 0 0 0 3px color-mix(in srgb, ${textColor} 60%, transparent)` : undefined,
             }}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="opacity-80" aria-hidden="true">
+            {/* The plus turns into a cross while the picker is open */}
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              className="opacity-80 transition-transform duration-300 ease-out motion-reduce:transition-none"
+              style={{ transform: pickerOpen ? "rotate(45deg)" : "none" }}
+              aria-hidden="true"
+            >
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
