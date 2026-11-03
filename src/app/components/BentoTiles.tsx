@@ -131,17 +131,30 @@ export function NowPlayingTile({ index }: { index: number }) {
   return (
     <Tile index={index} label={track?.nowPlaying ? "Listening to" : "Last played"} icon={<OnAirLight live={!!track?.nowPlaying} />} className="col-span-1 min-h-60 xl:min-h-72">
       <div className="relative z-10 mt-auto pt-4">
-        <div
-          className="image-edge w-14 h-14 rounded-[4px] overflow-hidden flex items-center justify-center"
-        >
-          {track?.imageLarge ? (
-            <img src={track.imageLarge} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
-              <circle cx="8" cy="18" r="4" />
-              <path d="M12 18V2l7 4" />
-            </svg>
+        <div className="relative w-14 h-14">
+          {/* A record that slides out of the sleeve once the track loads, and spins while it's playing */}
+          {track?.imageLarge && (
+            <div className={`vinyl ${track.nowPlaying ? "vinyl-spin" : ""}`} aria-hidden="true">
+              <div className="vinyl-disc">
+                <span className="vinyl-label" style={{ backgroundImage: `url(${track.imageLarge})` }} />
+              </div>
+              <span className="vinyl-sheen" />
+            </div>
           )}
+          <div
+            className="image-edge relative w-14 h-14 rounded-[4px] overflow-hidden flex items-center justify-center"
+            // Opaque while the art loads, so the record and sound waves don't show through
+            style={{ boxShadow: "2px 0 6px rgba(0, 0, 0, 0.25)", background: "color-mix(in srgb, var(--text-color) 10%, var(--bg-color))" }}
+          >
+            {track?.imageLarge ? (
+              <img src={track.imageLarge} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                <circle cx="8" cy="18" r="4" />
+                <path d="M12 18V2l7 4" />
+              </svg>
+            )}
+          </div>
         </div>
         <p className="mt-3 text-base font-medium leading-snug line-clamp-2">{track?.title ?? "\u00a0"}</p>
         <p className="text-sm leading-snug opacity-80 truncate">{track?.artist ?? "\u00a0"}</p>
