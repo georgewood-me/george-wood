@@ -104,6 +104,12 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
   const [isDesktop, setIsDesktop] = useState(false);
   const [isMobile, setIsMobile] = useState(true);
   const panelRef = useRef<HTMLDivElement>(null);
+  // On phones the sheet is anchored to the bottom, so growing would push its top edge up. Its height
+  // is fixed when it opens, and the colour picker then opens downward inside it, scrolling the rest.
+  const [sheetHeight, setSheetHeight] = useState<number | null>(null);
+  useEffect(() => {
+    setSheetHeight(open && isMobile ? panelRef.current?.offsetHeight ?? null : null);
+  }, [open, isMobile]);
   const btnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -575,6 +581,7 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
                     ...(!flat ? {} : { borderTop: "1px solid var(--border-color)" }),
                     borderRadius: "12px 12px 0 0",
                     maxHeight: "85vh",
+                    ...(sheetHeight ? { height: sheetHeight } : {}),
                   }
                 : {
                     ...(!flat ? {} : { border: "1px solid var(--border-color)" }),
