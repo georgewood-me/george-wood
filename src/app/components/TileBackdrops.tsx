@@ -256,7 +256,7 @@ export function DotGrid() {
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
-    const tile = canvas?.parentElement;
+    const tile = canvas?.closest<HTMLElement>(".bento-tile");
     if (!canvas || !ctx || !tile) return;
 
     const reduced = prefersReducedMotion();

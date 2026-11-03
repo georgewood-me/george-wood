@@ -131,6 +131,17 @@ html[data-cursor-trail="true"] [role="button"] {
   from { opacity: 0; filter: blur(8px); transform: translateY(0.15em); }
 }
 
+/* Tile backgrounds (waves, weather, dots, colour drift) wait for their tile like the text does,
+   fading in just behind the lines and words, not ahead of them */
+.bento-tile > .tile-backdrop {
+  animation: none;
+  transition: opacity 1.2s ease calc(var(--seen-delay, 0ms) + 0.25s);
+}
+
+.bento-tile:not([data-seen]) > .tile-backdrop {
+  opacity: 0;
+}
+
 .noise-layer {
   opacity: var(--noise-opacity, 0.2);
 }

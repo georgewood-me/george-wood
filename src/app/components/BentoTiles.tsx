@@ -195,7 +195,7 @@ export function NowPlayingTile({ index }: { index: number }) {
           <p className="text-sm leading-snug opacity-80 truncate">{track?.artist ?? "\u00a0"}</p>
         </div>
       </div>
-      <div className="absolute inset-0" style={{ maskImage: "linear-gradient(to top, black, transparent 90%)" }}>
+      <div className="tile-backdrop absolute inset-0" style={{ maskImage: "linear-gradient(to top, black, transparent 90%)" }}>
         <SoundWaves />
       </div>
     </Tile>
@@ -207,7 +207,9 @@ export function ClockTile({ index }: { index: number }) {
   const Icon = weather ? WEATHER_ICONS[weather.type] : null;
   return (
     <Tile index={index} label="Nottingham, UK" icon={<RadarPing />} className="col-span-1 min-h-60 xl:min-h-72 overflow-hidden">
-      <WeatherBackdrop type={weather?.type ?? null} />
+      <div className="tile-backdrop absolute inset-0">
+        <WeatherBackdrop type={weather?.type ?? null} />
+      </div>
       <div className="blur-in relative mt-auto" style={blurDelay(150)}>
         <p className="text-[40px] min-[375px]:text-[44px] sm:text-5xl font-medium leading-none tabular-nums" style={{ letterSpacing: "-0.03em" }}>
           {time || " "}
@@ -235,7 +237,9 @@ const contactLinks = [
 export function ContactTile({ index }: { index: number }) {
   return (
     <Tile index={index} label="Say hello" icon={<WavingHand />} className="col-span-2 sm:col-span-1">
-      <DotGrid />
+      <div className="tile-backdrop absolute inset-0">
+        <DotGrid />
+      </div>
       <ul className="relative mt-auto pt-4">
         {contactLinks.map((link, i) => (
           <li key={link.label} className="blur-in" style={blurDelay(150 + i * 60)}>
@@ -264,7 +268,9 @@ export function MakeItYoursTile({ index }: { index: number }) {
 
   return (
     <Tile index={index} label="Make it yours" icon={<Paintbrush />} className="col-span-2 sm:col-span-1 overflow-hidden">
-      <ColourDrift />
+      <div className="tile-backdrop absolute inset-0">
+        <ColourDrift />
+      </div>
       <p className="relative mt-4 text-sm leading-normal opacity-80">
         <BlurWords text="Redesign my site. I won’t take it personally." start={150} />
       </p>
