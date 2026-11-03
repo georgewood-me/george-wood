@@ -420,6 +420,64 @@ html[data-cursor-trail="true"] [role="button"] {
   75% { fill: #ca06ca; }
 }
 
+.cursor-arrow {
+  transform-origin: 4px 4px;
+  animation: cursor-press 3.2s ease-in-out infinite;
+}
+
+.cursor-ring {
+  transform-origin: 4px 4px;
+  opacity: 0;
+  animation: cursor-ring 3.2s ease-out infinite;
+}
+
+@keyframes cursor-press {
+  0%, 30%, 100% { transform: translate(2px, 2px) scale(1); }
+  40% { transform: translate(0, 0) scale(1); }
+  46% { transform: translate(0, 0) scale(0.82); }
+  54%, 70% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes cursor-ring {
+  0%, 45% { transform: scale(0.2); opacity: 0; }
+  47% { opacity: 0.9; }
+  75%, 100% { transform: scale(1); opacity: 0; }
+}
+
+.beating-heart {
+  transform-origin: 12px 13px;
+  animation: heartbeat 2.4s ease-in-out infinite;
+}
+
+/* Ba-dum, then a rest. */
+@keyframes heartbeat {
+  0%, 40%, 100% { transform: scale(1); }
+  8% { transform: scale(1.22); }
+  16% { transform: scale(0.96); }
+  24% { transform: scale(1.16); }
+}
+
+.eye-lid {
+  transform-origin: 12px 12px;
+  animation: blink 5s ease-in-out infinite;
+}
+
+.eye-pupil {
+  animation: glance 5s ease-in-out infinite;
+}
+
+/* Two quick blinks, then a long stare. */
+@keyframes blink {
+  0%, 40%, 46%, 52%, 100% { transform: scaleY(1); }
+  43%, 49% { transform: scaleY(0.1); }
+}
+
+@keyframes glance {
+  0%, 12%, 88%, 100% { transform: translateX(0); }
+  18%, 34% { transform: translateX(-2.5px); }
+  62%, 80% { transform: translateX(2.5px); }
+}
+
 /* While the container fills the screen, its right-hand hairlines would sit on the screen edge.
    The grid runs 1px wider than the container, so those lines fall just outside it and get clipped. */
 @media (max-width: 1280px) {

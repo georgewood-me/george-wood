@@ -9,7 +9,7 @@ import { testimonials } from "./testimonials";
 import { FilmCard, useRecentFilms } from "./Films";
 import { PRESETS } from "./ControlPanel";
 import { WeatherBackdrop, DotGrid, ColourDrift } from "./TileBackdrops";
-import { OnAirLight, Paintbrush, RadarPing, WavingHand } from "./LabelIcons";
+import { BlinkingEye, ClickingCursor, OnAirLight, Paintbrush, RadarPing, BeatingHeart, WavingHand } from "./LabelIcons";
 import { BlurWords, blurDelay } from "./BlurIn";
 
 function Tile({
@@ -311,7 +311,7 @@ export function MakeItYoursTile({ index }: { index: number }) {
 
 export function WorkTile({ index }: { index: number }) {
   return (
-    <Tile index={index} label="Selected work" className="col-span-2">
+    <Tile index={index} label="Selected work" icon={<ClickingCursor />} className="col-span-2">
       {/* Rows share any spare height evenly, so the list lines up with the tile beside it */}
       <ul id="work-list" className="flex flex-col flex-1 mt-6 -mx-(--tile-px) -mb-(--tile-py)">
         {projects.map((project, i) => (
@@ -381,7 +381,7 @@ export function KindWordsTile({ index }: { index: number }) {
   }, []);
 
   return (
-    <Tile index={index} label="Kind words" className="col-span-2">
+    <Tile index={index} label="Kind words" icon={<BeatingHeart />} className="col-span-2">
       {/* Every quote sits in the same cell so the tile is always as tall as the longest one */}
       <div className="relative grid flex-1 mt-8">
         {testimonials.map((t, i) => (
@@ -431,6 +431,7 @@ export function FilmsTile({ index }: { index: number }) {
     <Tile
       index={index}
       label="Recently watched"
+      icon={<BlinkingEye />}
       className="col-span-2 lg:col-span-4"
       aside={
         <a

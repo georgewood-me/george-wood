@@ -47,3 +47,37 @@ export function Paintbrush() {
     </svg>
   );
 }
+
+// A pointer that clicks, sending a ring out from its tip
+export function ClickingCursor() {
+  return (
+    <svg className="label-icon cursor-click" viewBox="0 0 24 24" aria-hidden="true" {...stroke}>
+      <circle className="cursor-ring" cx="4" cy="4" r="5" />
+      <path
+        className="cursor-arrow"
+        d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z"
+      />
+    </svg>
+  );
+}
+
+// A heart that gives a double beat every couple of seconds
+export function BeatingHeart() {
+  return (
+    <svg className="label-icon beating-heart" viewBox="0 0 24 24" aria-hidden="true" {...stroke}>
+      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+    </svg>
+  );
+}
+
+// An eye that looks around and blinks now and then
+export function BlinkingEye() {
+  return (
+    <svg className="label-icon" viewBox="0 0 24 24" aria-hidden="true" {...stroke}>
+      <g className="eye-lid">
+        <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+        <circle className="eye-pupil" cx="12" cy="12" r="3" fill="currentColor" />
+      </g>
+    </svg>
+  );
+}
