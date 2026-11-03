@@ -165,7 +165,7 @@ export function NowPlayingTile({ index }: { index: number }) {
   return (
     <Tile index={index} label={track?.nowPlaying ? "Listening to" : "Last played"} icon={<OnAirLight live={!!track?.nowPlaying} />} className="col-span-1 min-h-60 xl:min-h-72">
       <div className="relative z-10 mt-auto pt-4">
-        <div className="relative w-14 h-14">
+        <div className="pop-in relative w-14 h-14" style={blurDelay(100)}>
           {/* A record that slides out of the sleeve once the track loads, and spins while it's playing */}
           {track?.imageLarge && (
             <div className={`vinyl ${track.nowPlaying ? "vinyl-spin" : ""}`} aria-hidden="true">
@@ -275,14 +275,15 @@ export function MakeItYoursTile({ index }: { index: number }) {
         <BlurWords text="Redesign my site. I won’t take it personally." start={150} />
       </p>
       <div className="relative mt-auto pt-6 grid grid-cols-8 gap-2">
-        {PRESETS.map((color) => (
+        {PRESETS.map((color, i) => (
           <button
             key={color}
             onClick={() => window.dispatchEvent(new CustomEvent("controls:set-bg", { detail: color }))}
-            className="glass-swatch aspect-square"
+            className="glass-swatch pop-in aspect-square"
             aria-label={`Set background to ${color}`}
             aria-pressed={bg.toLowerCase() === color.toLowerCase()}
             style={{
+              ...blurDelay(300 + i * 40),
               background: color,
               borderRadius: 3,
               border: "1px solid var(--border-color)",
