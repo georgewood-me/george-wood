@@ -58,25 +58,23 @@ function Slider({
   max: number;
   suffix?: string;
 }) {
+  // One line per slider: the label, the track filling the middle, then the value
   return (
-    <div>
-      <div className="flex items-baseline justify-between">
-        <span>{label}</span>
-        <span className="panel-value">
-          {value}
-          {suffix}
-        </span>
-      </div>
-      {/* The line sits 12px under the label, clear of the thumb; the rest of the 32px hit area overlaps the gaps */}
+    <div className="flex items-center gap-3">
+      <span className="w-[84px] shrink-0">{label}</span>
       <input
         type="range"
         min={min}
         max={max}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="control-slider -mt-1 -mb-4"
+        className="control-slider min-w-0 flex-1"
         aria-label={label}
       />
+      <span className="panel-value w-10 shrink-0 text-right">
+        {value}
+        {suffix}
+      </span>
     </div>
   );
 }
@@ -334,14 +332,6 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 mb-5">
-      <Slider label="Borders" value={borders} onChange={setBorders} min={0} max={100} suffix="%" />
-      <Slider label="Noise" value={noise} onChange={setNoise} min={0} max={80} suffix="%" />
-      <Slider label="Noise speed" value={noiseSpeed} onChange={setNoiseSpeed} min={0} max={25} suffix="fps" />
-      <Slider label="Motion" value={waves} onChange={setWaves} min={0} max={200} suffix="%" />
-      <Slider label="Scanlines" value={scanlines} onChange={setScanlines} min={0} max={100} suffix="%" />
-      </div>
-
       <div className="mb-5">
         <div className="tile-label mb-2">Typeface</div>
         <div className="grid grid-cols-3 gap-2">
@@ -350,11 +340,11 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
               key={f.name}
               onClick={() => setFont(f.name)}
               aria-pressed={font === f.name}
-              className={`glass-btn flex-1 h-9 flex items-center justify-center ${font === f.name ? "" : "opacity-60"} hover:opacity-100`}
+              className={`glass-btn flex-1 h-9 flex items-center justify-center ${font === f.name ? "" : "opacity-80"} hover:opacity-100`}
               style={{
                 borderRadius: 4,
                 fontFamily: `var(${f.cssVar})`,
-                fontSize: 13,
+                fontSize: 12,
                 ...(font === f.name ? { border: "1px solid color-mix(in srgb, var(--text-color) 60%, transparent)" } : {}),
               }}
             >
@@ -364,7 +354,26 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
         </div>
       </div>
 
-      <div className="mb-5 hidden lg:block">
+      {/* Finish and Container are short rows of options, so on desktop they share a line */}
+      <div className="mb-5 grid lg:grid-cols-2 gap-x-4 gap-y-5">
+      <div>
+        <div className="tile-label mb-2">Finish</div>
+        <div className="flex gap-2">
+          {FINISHES.map((f) => (
+            <button
+              key={f.name}
+              onClick={() => setFinish(f.name)}
+              aria-pressed={finish === f.name}
+              className={`glass-btn flex-1 h-9 flex items-center justify-center ${finish === f.name ? "" : "opacity-80"} hover:opacity-100`}
+              style={{ borderRadius: 4, ...(finish === f.name ? { border: "1px solid color-mix(in srgb, var(--text-color) 60%, transparent)" } : {}) }}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="hidden lg:block">
         <div className="tile-label mb-2">Container</div>
         <div className="flex gap-2">
           {(["left", "center", "right"] as const).map((option) => {
@@ -374,7 +383,7 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
                 key={option}
                 onClick={() => setAlign(option)}
                 aria-pressed={align === option}
-                className={`glass-btn flex-1 h-9 flex items-center justify-center gap-[1.5px] ${align === option ? "" : "opacity-60"} hover:opacity-100`}
+                className={`glass-btn flex-1 h-9 flex items-center justify-center gap-[1.5px] ${align === option ? "" : "opacity-80"} hover:opacity-100`}
                 style={{ borderRadius: 4, ...(align === option ? { border: "1px solid color-mix(in srgb, var(--text-color) 60%, transparent)" } : {}) }}
               >
                 {[0, 1, 2].map((i) => (
@@ -395,6 +404,19 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
           })}
         </div>
       </div>
+      </div>
+
+      {/* Texture first, then motion, then the grid lines */}
+      <div className="mb-5">
+        <div className="tile-label">Effects</div>
+        <div className="flex flex-col">
+          <Slider label="Noise" value={noise} onChange={setNoise} min={0} max={80} suffix="%" />
+          <Slider label="Noise speed" value={noiseSpeed} onChange={setNoiseSpeed} min={0} max={25} suffix="fps" />
+          <Slider label="Scanlines" value={scanlines} onChange={setScanlines} min={0} max={100} suffix="%" />
+          <Slider label="Motion" value={waves} onChange={setWaves} min={0} max={200} suffix="%" />
+          <Slider label="Borders" value={borders} onChange={setBorders} min={0} max={100} suffix="%" />
+        </div>
+      </div>
     </>
   );
 
@@ -404,7 +426,8 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
       <div className={`shrink-0 flex gap-2 px-5 pt-5 ${isMobile ? "pb-8" : "pb-5"}`} style={{ borderTop: "1px solid var(--border-color)" }}>
         <button
           onClick={randomize}
-          className="glass-btn flex-1 h-9 flex items-center justify-center gap-1.5 rounded-[4px] opacity-60 hover:opacity-100"
+          className="glass-btn w-9 h-9 shrink-0 flex items-center justify-center rounded-[4px] opacity-60 hover:opacity-100"
+          aria-label="Randomise settings"
           style={{ borderRadius: 4 }}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -414,36 +437,21 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
             <path d="M15 15l6 6" />
             <path d="M4 4l5 5" />
           </svg>
-          <span>Random</span>
         </button>
         <button
           onClick={reset}
-          className="glass-btn flex-1 h-9 flex items-center justify-center gap-1.5 rounded-[4px] opacity-60 hover:opacity-100"
+          className="glass-btn w-9 h-9 shrink-0 flex items-center justify-center rounded-[4px] opacity-60 hover:opacity-100"
+          aria-label="Reset settings"
           style={{ borderRadius: 4 }}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
             <path d="M3 3v5h5" />
           </svg>
-          <span>Reset</span>
         </button>
-        {isDesktop && (
-          <button
-            onClick={() => setCursorTrail(cursorTrail > 0 ? 0 : 100)}
-            className={`glass-btn h-9 flex items-center justify-center px-3 rounded-[4px] hover:opacity-100 ${cursorTrail > 0 ? "" : "opacity-60"}`}
-            aria-label="Toggle cursor trail"
-            aria-pressed={cursorTrail > 0}
-            style={{ borderRadius: 4, ...(cursorTrail > 0 ? { border: "1px solid color-mix(in srgb, var(--text-color) 60%, transparent)" } : {}) }}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 4l7.07 17 2.51-7.39L21 11.07z" />
-            </svg>
-          </button>
-        )}
         <button
           onClick={() => { closePanel(); showToast("Settings saved"); }}
-          className="glass-btn h-9 flex items-center justify-center px-3 rounded-[4px] opacity-60 hover:opacity-100"
-          aria-label="Save settings"
+          className="glass-btn flex-1 h-9 flex items-center justify-center gap-1.5 rounded-[4px] opacity-80 hover:opacity-100"
           style={{ borderRadius: 4 }}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -451,18 +459,20 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
             <polyline points="17 21 17 13 7 13 7 21" />
             <polyline points="7 3 7 8 15 8" />
           </svg>
+          <span>Save</span>
         </button>
+        {/* The primary action: sharing your version is what the panel builds up to */}
         <button
           onClick={share}
-          className="glass-btn h-9 flex items-center justify-center px-3 rounded-[4px] opacity-60 hover:opacity-100"
-          aria-label="Copy share link"
-          style={{ borderRadius: 4 }}
+          className="flex-1 h-9 flex items-center justify-center gap-1.5 rounded-[4px] font-medium hover:opacity-85 transition-opacity"
+          style={{ borderRadius: 4, background: "var(--text-color)", color: "var(--bg-color)" }}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
             <polyline points="16 6 12 2 8 6" />
             <line x1="12" y1="2" x2="12" y2="15" />
           </svg>
+          <span>Share</span>
         </button>
       </div>
     </>
@@ -580,24 +590,7 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
                   }),
             }}
           >
-            <div className={`min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 ${isMobile ? "pt-2" : "pt-5"}`}>
-            <div className={`${isMobile ? "mb-5 mt-2" : "mb-5"} flex items-center justify-between`}>
-              <span className="tile-label">Make it yours</span>
-              <div className="flex gap-1.5">
-                {FINISHES.map((f) => (
-                  <button
-                    key={f.name}
-                    onClick={() => setFinish(f.name)}
-                    aria-pressed={finish === f.name}
-                    className={`glass-btn text-xs px-2.5 py-1 rounded-[4px] ${finish === f.name ? "" : "opacity-60 hover:opacity-100"}`}
-                    style={finish === f.name ? { border: `1px solid color-mix(in srgb, var(--text-color) 60%, transparent)` } : {}}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-5">
             {panelContent}
             </div>
 
