@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Image from "next/image";
 import { SoundWaves, useRecentTrack } from "./NowPlaying";
 import { useNottingham, WEATHER_ICONS, WEATHER_LABELS } from "./Weather";
@@ -10,6 +10,7 @@ import { FilmCard, useRecentFilms } from "./Films";
 import { PRESETS } from "./ControlPanel";
 import { WeatherBackdrop, DotGrid, ColourDrift } from "./TileBackdrops";
 import { OnAirLight, Paintbrush, RadarPing, WavingHand } from "./LabelIcons";
+import { BlurWords, blurDelay } from "./BlurIn";
 
 function Tile({
   label,
@@ -26,16 +27,40 @@ function Tile({
   className?: string;
   children: ReactNode;
 }) {
+  const ref = useRef<HTMLElement>(null);
+  const [seen, setSeen] = useState<number | null>(null);
+
+  // Marks the tile once it first comes into view, which starts its text blurring in. Tiles on
+  // screen at load keep their stagger; ones reached by scrolling start straight away.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setSeen(performance.now() < 1500 ? index * 100 : 0);
+        observer.disconnect();
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [index]);
+
   return (
     <section
+      ref={ref}
+      data-seen={seen !== null || undefined}
       className={`bento-tile relative flex flex-col px-(--tile-px) py-(--tile-py) bg-(--bg-color) ${className}`}
-      style={{ "--tile-delay": `${index * 100}ms` } as CSSProperties}
+      style={{ "--tile-delay": `${index * 100}ms`, "--seen-delay": `${seen ?? 0}ms` } as CSSProperties}
     >
       {label && (
         <div className="relative flex items-center justify-between min-h-6">
           <span className="flex items-center gap-2">
             {icon}
-            <span className="tile-label">{label}</span>
+            <span className="tile-label">
+              <BlurWords text={label} />
+            </span>
           </span>
           {aside}
         </div>
@@ -47,13 +72,18 @@ function Tile({
 
 function Identity() {
   return (
-    <div className="flex items-center gap-3">
-      <div className="glass-poster image-edge" style={{ borderRadius: 4, overflow: "hidden", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)" }}>
+    // Always marked as seen, so it comes into focus as soon as the page loads
+    <div className="flex items-center gap-3" data-seen>
+      <div className="blur-in glass-poster image-edge" style={{ borderRadius: 4, overflow: "hidden", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)" }}>
         <Image src="/images/avatar.png" alt="George Wood" width={40} height={40} className="block" />
       </div>
       <div>
-        <p className="font-medium text-sm leading-snug">George Wood</p>
-        <p className="text-sm opacity-80 leading-snug">Product Designer at Stripe</p>
+        <p className="font-medium text-sm leading-snug">
+          <BlurWords text="George Wood" start={60} />
+        </p>
+        <p className="text-sm opacity-80 leading-snug">
+          <BlurWords text="Product Designer at Stripe" start={120} />
+        </p>
       </div>
     </div>
   );
@@ -111,14 +141,18 @@ export function IntroTile({ index }: { index: number }) {
       <div className="h-10" aria-hidden="true" />
       <div className="mt-auto pt-16 sm:pt-20 xl:pt-28">
         <p className="text-2xl sm:text-[28px] xl:text-[32px] font-medium leading-[1.2] text-balance" style={{ letterSpacing: "-0.02em" }}>
-          I work in Extensibility at <StripeWordmark />, helping to shape how developers and users extend our platform with apps and extensions.
+          <BlurWords text="I work in Extensibility at" />{" "}
+          <span className="blur-in inline-block" style={blurDelay(5 * 28)}>
+            <StripeWordmark />,
+          </span>{" "}
+          <BlurWords text="helping to shape how developers and users extend our platform with apps and extensions." start={6 * 28} />
         </p>
         <div className="mt-10 grid sm:grid-cols-2 gap-6 sm:gap-8 text-sm leading-relaxed opacity-80">
           <p>
-            I previously spent over 15 years working in agencies, specialising in designing ecommerce platforms and the tools that let brands build and curate campaigns their own way.
+            <BlurWords text="I previously spent over 15 years working in agencies, specialising in designing ecommerce platforms and the tools that let brands build and curate campaigns their own way." start={400} />
           </p>
           <p>
-            Across all of that, what’s stayed consistent is a focus on the people actually using the thing – and a habit of noticing the small stuff that’s easy to overlook but ends up mattering.
+            <BlurWords text="Across all of that, what’s stayed consistent is a focus on the people actually using the thing – and a habit of noticing the small stuff that’s easy to overlook but ends up mattering." start={550} />
           </p>
         </div>
       </div>
@@ -156,8 +190,10 @@ export function NowPlayingTile({ index }: { index: number }) {
             )}
           </div>
         </div>
-        <p className="mt-3 text-base font-medium leading-snug line-clamp-2">{track?.title ?? "\u00a0"}</p>
-        <p className="text-sm leading-snug opacity-80 truncate">{track?.artist ?? "\u00a0"}</p>
+        <div className="blur-in" style={blurDelay(150)}>
+          <p className="mt-3 text-base font-medium leading-snug line-clamp-2">{track?.title ?? "\u00a0"}</p>
+          <p className="text-sm leading-snug opacity-80 truncate">{track?.artist ?? "\u00a0"}</p>
+        </div>
       </div>
       <div className="absolute inset-0" style={{ maskImage: "linear-gradient(to top, black, transparent 90%)" }}>
         <SoundWaves />
@@ -172,7 +208,7 @@ export function ClockTile({ index }: { index: number }) {
   return (
     <Tile index={index} label="Nottingham, UK" icon={<RadarPing />} className="col-span-1 min-h-60 xl:min-h-72 overflow-hidden">
       <WeatherBackdrop type={weather?.type ?? null} />
-      <div className="relative mt-auto">
+      <div className="blur-in relative mt-auto" style={blurDelay(150)}>
         <p className="text-[40px] min-[375px]:text-[44px] sm:text-5xl font-medium leading-none tabular-nums" style={{ letterSpacing: "-0.03em" }}>
           {time || " "}
         </p>
@@ -201,8 +237,8 @@ export function ContactTile({ index }: { index: number }) {
     <Tile index={index} label="Say hello" icon={<WavingHand />} className="col-span-2 sm:col-span-1">
       <DotGrid />
       <ul className="relative mt-auto pt-4">
-        {contactLinks.map((link) => (
-          <li key={link.label}>
+        {contactLinks.map((link, i) => (
+          <li key={link.label} className="blur-in" style={blurDelay(150 + i * 60)}>
             <a
               href={link.href}
               {...(link.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
@@ -230,7 +266,7 @@ export function MakeItYoursTile({ index }: { index: number }) {
     <Tile index={index} label="Make it yours" icon={<Paintbrush />} className="col-span-2 sm:col-span-1 overflow-hidden">
       <ColourDrift />
       <p className="relative mt-4 text-sm leading-normal opacity-80">
-        Redesign my site. I won’t take it personally.
+        <BlurWords text="Redesign my site. I won’t take it personally." start={150} />
       </p>
       <div className="relative mt-auto pt-6 grid grid-cols-8 gap-2">
         {PRESETS.map((color) => (
@@ -272,15 +308,15 @@ export function WorkTile({ index }: { index: number }) {
     <Tile index={index} label="Selected work" className="col-span-2">
       {/* Rows share any spare height evenly, so the list lines up with the tile beside it */}
       <ul id="work-list" className="flex flex-col flex-1 mt-6 -mx-(--tile-px) -mb-(--tile-py)">
-        {projects.map((project) => (
+        {projects.map((project, i) => (
           <li
             key={project.name}
             className="flex flex-1 items-center justify-between gap-3 px-(--tile-px) py-4"
             style={{ borderTop: "1px solid var(--border-color)" }}
           >
             <div
-              className="flex flex-1 items-center gap-2 min-w-0 overflow-hidden"
-              style={{ maskImage: "linear-gradient(to right, black calc(100% - 24px), transparent)" }}
+              className="blur-in flex flex-1 items-center gap-2 min-w-0 overflow-hidden"
+              style={{ ...blurDelay(150 + i * 50), maskImage: "linear-gradient(to right, black calc(100% - 24px), transparent)" }}
             >
               <span className="text-sm font-medium leading-snug shrink-0">{project.name}</span>
               {project.awards.map((award) => (
@@ -290,13 +326,14 @@ export function WorkTile({ index }: { index: number }) {
               ))}
             </div>
             {project.disabled ? (
-              <span className="text-sm opacity-50 shrink-0">Archived</span>
+              <span className="blur-in text-sm opacity-50 shrink-0" style={blurDelay(150 + i * 50)}>Archived</span>
             ) : (
               <a
                 href={project.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="-my-4 py-4 text-sm opacity-80 hover:opacity-100 transition-opacity shrink-0"
+                className="blur-in -my-4 py-4 text-sm opacity-80 hover:opacity-100 transition-opacity shrink-0"
+                style={blurDelay(150 + i * 50)}
               >
                 View site ↗
               </a>
@@ -348,8 +385,10 @@ export function KindWordsTile({ index }: { index: number }) {
             className="flex flex-col justify-between transition-opacity duration-300"
             style={{ gridArea: "1 / 1", opacity: i === current ? 1 : 0, pointerEvents: i === current ? "auto" : "none" }}
           >
-            <blockquote className="text-[15px] sm:text-base leading-relaxed max-w-[60ch]">{t.quote}</blockquote>
-            <figcaption className="flex items-end justify-between gap-4 mt-10">
+            <blockquote className="text-[15px] sm:text-base leading-relaxed max-w-[60ch]">
+              <BlurWords text={t.quote} start={150} />
+            </blockquote>
+            <figcaption className="blur-in flex items-end justify-between gap-4 mt-10" style={blurDelay(900)}>
               <div>
                 <p className="text-sm font-medium leading-snug">{t.name}</p>
                 <p className="text-xs opacity-50 mt-0.5">{t.role}</p>
@@ -399,8 +438,10 @@ export function FilmsTile({ index }: { index: number }) {
       }
     >
       <div className="relative mt-6 grid grid-cols-3 sm:grid-cols-6 gap-3 xl:gap-4">
-        {films.map((film) => (
-          <FilmCard key={film.url} film={film} />
+        {films.map((film, i) => (
+          <div key={film.url} className="blur-in" style={blurDelay(150 + i * 60)}>
+            <FilmCard film={film} />
+          </div>
         ))}
       </div>
     </Tile>
