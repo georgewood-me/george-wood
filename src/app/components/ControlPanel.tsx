@@ -501,7 +501,8 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
             background: "var(--bg-color)",
           }),
           ...(isDesktop ? {
-            left: align === "left" ? `min(${containerWidth - 56}px, calc(100vw - 56px))` : align === "center" ? `calc(min(50vw + ${containerWidth / 2}px, 100vw) - 56px)` : "calc(100vw - 56px)",
+            // Inset from the container edge by the tile padding, so it lines up with the content below
+            left: `calc(${align === "left" ? `min(${containerWidth}px, 100vw)` : align === "center" ? `min(50vw + ${containerWidth / 2}px, 100vw)` : "100vw"} - 36px - var(--tile-px))`,
             top: desktopTop,
             right: "auto",
             transition: "left 0.4s ease",
@@ -573,7 +574,7 @@ export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: 
                     right: isDesktop ? "auto" : 16,
                     ...(isDesktop
                       ? {
-                          left: align === "left" ? `min(${containerWidth - 366}px, calc(100vw - 366px))` : align === "center" ? `calc(min(50vw + ${containerWidth / 2}px, 100vw) - 366px)` : "calc(100vw - 366px)",
+                          left: `calc(${align === "left" ? `min(${containerWidth}px, 100vw)` : align === "center" ? `min(50vw + ${containerWidth / 2}px, 100vw)` : "100vw"} - 346px - var(--tile-px))`,
                         }
                       : {}),
                   }),

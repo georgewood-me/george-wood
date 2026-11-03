@@ -28,7 +28,7 @@ function Tile({
 }) {
   return (
     <section
-      className={`bento-tile relative flex flex-col p-5 bg-(--bg-color) ${className}`}
+      className={`bento-tile relative flex flex-col px-(--tile-px) py-(--tile-py) bg-(--bg-color) ${className}`}
       style={{ "--tile-delay": `${index * 100}ms` } as CSSProperties}
     >
       {label && (
@@ -72,7 +72,7 @@ export function PageHeader() {
 
   return (
     <header className="sticky top-0 z-40 h-0">
-      <div className="absolute inset-x-0 top-0 h-20 flex items-center px-5 pointer-events-none">
+      <div className="absolute inset-x-0 top-0 h-20 flex items-center px-(--tile-px) pointer-events-none">
         <div
           aria-hidden="true"
           className="frost header-frost absolute inset-0 border-b border-r transition-opacity duration-300 ease-out"
@@ -109,11 +109,11 @@ export function IntroTile({ index }: { index: number }) {
   return (
     <Tile index={index} className="col-span-2 lg:row-span-2">
       <div className="h-10" aria-hidden="true" />
-      <div className="mt-auto pt-10 sm:pt-16">
-        <p className="text-2xl sm:text-[28px] font-medium leading-[1.2] text-balance" style={{ letterSpacing: "-0.02em" }}>
+      <div className="mt-auto pt-16 sm:pt-20 xl:pt-28">
+        <p className="text-2xl sm:text-[28px] xl:text-[32px] font-medium leading-[1.2] text-balance" style={{ letterSpacing: "-0.02em" }}>
           I work in Extensibility at <StripeWordmark />, helping to shape how developers and users extend our platform with apps and extensions.
         </p>
-        <div className="mt-8 grid sm:grid-cols-2 gap-4 text-sm leading-normal opacity-80">
+        <div className="mt-10 grid sm:grid-cols-2 gap-6 sm:gap-8 text-sm leading-relaxed opacity-80">
           <p>
             I previously spent over 15 years working in agencies, specialising in designing ecommerce platforms and the tools that let brands build and curate campaigns their own way.
           </p>
@@ -129,7 +129,7 @@ export function IntroTile({ index }: { index: number }) {
 export function NowPlayingTile({ index }: { index: number }) {
   const track = useRecentTrack();
   return (
-    <Tile index={index} label={track?.nowPlaying ? "Listening to" : "Last played"} icon={<OnAirLight live={!!track?.nowPlaying} />} className="col-span-1 min-h-60">
+    <Tile index={index} label={track?.nowPlaying ? "Listening to" : "Last played"} icon={<OnAirLight live={!!track?.nowPlaying} />} className="col-span-1 min-h-60 xl:min-h-72">
       <div className="relative z-10 mt-auto pt-4">
         <div
           className="image-edge w-14 h-14 rounded-[4px] overflow-hidden flex items-center justify-center"
@@ -157,7 +157,7 @@ export function ClockTile({ index }: { index: number }) {
   const { time, weather } = useNottingham();
   const Icon = weather ? WEATHER_ICONS[weather.type] : null;
   return (
-    <Tile index={index} label="Nottingham, UK" icon={<RadarPing />} className="col-span-1 min-h-60 overflow-hidden">
+    <Tile index={index} label="Nottingham, UK" icon={<RadarPing />} className="col-span-1 min-h-60 xl:min-h-72 overflow-hidden">
       <WeatherBackdrop type={weather?.type ?? null} />
       <div className="relative mt-auto">
         <p className="text-[40px] min-[375px]:text-[44px] sm:text-5xl font-medium leading-none tabular-nums" style={{ letterSpacing: "-0.03em" }}>
@@ -258,11 +258,11 @@ export function WorkTile({ index }: { index: number }) {
   return (
     <Tile index={index} label="Selected work" className="col-span-2">
       {/* Rows share any spare height evenly, so the list lines up with the tile beside it */}
-      <ul id="work-list" className="flex flex-col flex-1 mt-4 -mx-5 -mb-5">
+      <ul id="work-list" className="flex flex-col flex-1 mt-6 -mx-(--tile-px) -mb-(--tile-py)">
         {projects.map((project) => (
           <li
             key={project.name}
-            className="flex flex-1 items-center justify-between gap-3 px-5 py-3"
+            className="flex flex-1 items-center justify-between gap-3 px-(--tile-px) py-4"
             style={{ borderTop: "1px solid var(--border-color)" }}
           >
             <div
@@ -283,7 +283,7 @@ export function WorkTile({ index }: { index: number }) {
                 href={project.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="-my-3 py-3 text-sm opacity-80 hover:opacity-100 transition-opacity shrink-0"
+                className="-my-4 py-4 text-sm opacity-80 hover:opacity-100 transition-opacity shrink-0"
               >
                 View site ↗
               </a>
@@ -327,7 +327,7 @@ export function KindWordsTile({ index }: { index: number }) {
   return (
     <Tile index={index} label="Kind words" className="col-span-2">
       {/* Every quote sits in the same cell so the tile is always as tall as the longest one */}
-      <div className="relative grid flex-1 mt-6">
+      <div className="relative grid flex-1 mt-8">
         {testimonials.map((t, i) => (
           <figure
             key={t.name}
@@ -335,8 +335,8 @@ export function KindWordsTile({ index }: { index: number }) {
             className="flex flex-col justify-between transition-opacity duration-300"
             style={{ gridArea: "1 / 1", opacity: i === current ? 1 : 0, pointerEvents: i === current ? "auto" : "none" }}
           >
-            <blockquote className="text-[15px] sm:text-base leading-normal max-w-[60ch]">{t.quote}</blockquote>
-            <figcaption className="flex items-end justify-between gap-4 mt-8">
+            <blockquote className="text-[15px] sm:text-base leading-relaxed max-w-[60ch]">{t.quote}</blockquote>
+            <figcaption className="flex items-end justify-between gap-4 mt-10">
               <div>
                 <p className="text-sm font-medium leading-snug">{t.name}</p>
                 <p className="text-xs opacity-50 mt-0.5">{t.role}</p>
@@ -350,8 +350,8 @@ export function KindWordsTile({ index }: { index: number }) {
       </div>
 
       {/* Controls sit in a ruled strip along the foot of the tile, like the grid around it */}
-      <div className="relative flex h-14 -mx-5 -mb-5 mt-8 border-t" style={{ ...rule, ...(stripHeight ? { height: stripHeight } : {}) }}>
-        <span className="tile-label flex items-center px-5 mr-auto tabular-nums" aria-live="polite">
+      <div className="relative flex h-14 -mx-(--tile-px) -mb-(--tile-py) mt-10 border-t" style={{ ...rule, ...(stripHeight ? { height: stripHeight } : {}) }}>
+        <span className="tile-label flex items-center px-(--tile-px) mr-auto tabular-nums" aria-live="polite">
           {pad(current + 1)} / {pad(count)}
         </span>
         <button onClick={() => step(-1)} className={arrow} style={rule} aria-label="Previous quote">
@@ -385,7 +385,7 @@ export function FilmsTile({ index }: { index: number }) {
         </a>
       }
     >
-      <div className="relative mt-4 grid grid-cols-3 sm:grid-cols-6 gap-3">
+      <div className="relative mt-6 grid grid-cols-3 sm:grid-cols-6 gap-3 xl:gap-4">
         {films.map((film) => (
           <FilmCard key={film.url} film={film} />
         ))}

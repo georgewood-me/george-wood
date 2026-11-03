@@ -11,12 +11,12 @@ import {
   PageHeader,
 } from "./components/BentoTiles";
 
-const CONTAINER_WIDTH = 1120;
+const CONTAINER_WIDTH = 1280;
 
 export default function Home() {
   return (
     <div
-      className="content-container relative min-h-screen flex flex-col w-full max-w-[1120px]"
+      className="content-container relative min-h-screen flex flex-col w-full max-w-[1280px]"
       style={{
         marginLeft: "var(--container-ml, 0)",
         marginRight: "var(--container-mr, auto)",

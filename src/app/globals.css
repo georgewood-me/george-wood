@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 :root {
+  /* Tile padding. Phones get more room top and bottom than at the sides, where width is scarce;
+     large screens get more of both. The header, work rows and testimonial strip all follow these. */
+  --tile-px: 20px;
+  --tile-py: 28px;
   --background: #0038FF;
   --foreground: #ffffff;
   --bg-color: #0038FF;
@@ -62,6 +66,19 @@ html[data-cursor-trail="true"] input,
 html[data-cursor-trail="true"] label,
 html[data-cursor-trail="true"] [role="button"] {
   cursor: none !important;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --tile-px: 24px;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --tile-px: 32px;
+    --tile-py: 32px;
+  }
 }
 
 @keyframes tile-in {
@@ -364,7 +381,7 @@ html[data-cursor-trail="true"] [role="button"] {
 
 /* While the container fills the screen, its right-hand hairlines would sit on the screen edge.
    The grid runs 1px wider than the container, so those lines fall just outside it and get clipped. */
-@media (max-width: 1120px) {
+@media (max-width: 1280px) {
   .content-container {
     overflow-x: clip;
     /* And the left border the container position adds */
