@@ -15,16 +15,28 @@ export function useRecentTrack() {
   const [track, setTrack] = useState<Track | null>(null);
 
   useEffect(() => {
-    const apiKey = "2e7aa7aba14b552f8cf7b048661ff913";
-    const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=georgewood_me&api_key=${apiKey}&format=json&limit=1`;
-    fetch(url)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        const t = data?.recenttracks?.track?.[0];
-        const imageOf = (size: string) => t.image?.find((img: { size: string }) => img.size === size)?.["#text"] || "";
-        if (t) setTrack({ title: t.name, artist: t.artist["#text"], nowPlaying: t["@attr"]?.nowplaying === "true", image: imageOf("small"), imageLarge: imageOf("extralarge") });
-      })
-      .catch(() => {});
+    // Spotify for what's playing now, Last.fm for what played last (see api/now-playing)
+    const load = () =>
+      fetch("/api/now-playing")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data: Track | null) => {
+          if (data?.title) setTrack(data);
+        })
+        .catch(() => {});
+    load();
+
+    // Keep up with pauses and track changes while the page is open and in view
+    const timer = setInterval(() => {
+      if (document.visibilityState === "visible") load();
+    }, 30_000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
 
   return track;
