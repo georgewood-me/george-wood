@@ -112,5 +112,6 @@ export async function GET() {
   if (live === null && track) track = { ...track, nowPlaying: false };
   // idle tells the browser's own Last.fm fallback that Spotify has said nothing is playing
   if (!track) return NextResponse.json({ error: "No recent tracks", idle: live === null, problems }, { status: 404 });
-  return NextResponse.json(track, { headers: { "Cache-Control": "no-store" } });
+  // problems says why Spotify was skipped, if it was (statuses only, never keys)
+  return NextResponse.json({ ...track, ...(problems.length ? { problems } : {}) }, { headers: { "Cache-Control": "no-store" } });
 }
