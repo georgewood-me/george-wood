@@ -280,8 +280,8 @@ html[data-cursor-trail="true"] [role="button"] {
   --glass-fill: color-mix(in srgb, var(--bg-color) 30%, transparent);
   --glass-sheen: color-mix(in srgb, var(--text-color) 10%, transparent);
   --glass-edge: color-mix(in srgb, var(--text-color) 22%, transparent);
-  /* Just a hint of extra light on the top edge, over the border */
-  --glass-highlight: color-mix(in srgb, var(--text-color) 12%, transparent);
+  /* The lit top edge: the border itself, a little brighter, so it stays one crisp line */
+  --glass-highlight: color-mix(in srgb, var(--text-color) 40%, transparent);
   --glass-shadow: color-mix(in srgb, color-mix(in srgb, var(--bg-color), black 55%) 45%, transparent);
 }
 
@@ -291,9 +291,8 @@ html[data-cursor-trail="true"] [role="button"] {
   -webkit-backdrop-filter: blur(8px) saturate(180%);
   backdrop-filter: blur(8px) saturate(180%);
   border: 1px solid var(--glass-edge);
-  box-shadow:
-    inset 0 1px 0 var(--glass-highlight),
-    0 12px 32px -8px var(--glass-shadow);
+  border-top-color: var(--glass-highlight);
+  box-shadow: 0 12px 32px -8px var(--glass-shadow);
 }
 
 /* Frosted panels that sit inside the page: solid with a hairline in Flat,
