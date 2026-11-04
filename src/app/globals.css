@@ -280,7 +280,8 @@ html[data-cursor-trail="true"] [role="button"] {
   --glass-fill: color-mix(in srgb, var(--bg-color) 30%, transparent);
   --glass-sheen: color-mix(in srgb, var(--text-color) 10%, transparent);
   --glass-edge: color-mix(in srgb, var(--text-color) 22%, transparent);
-  --glass-highlight: color-mix(in srgb, var(--text-color) 45%, transparent);
+  /* Just a hint of extra light on the top edge, over the border */
+  --glass-highlight: color-mix(in srgb, var(--text-color) 12%, transparent);
   --glass-shadow: color-mix(in srgb, color-mix(in srgb, var(--bg-color), black 55%) 45%, transparent);
 }
 
