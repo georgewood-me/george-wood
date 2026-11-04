@@ -69,7 +69,8 @@ async function lastfmRecent(): Promise<Track | null> {
 
   const res = await fetch(
     `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${LASTFM_USER}&api_key=${apiKey}&format=json&limit=1`,
-    { cache: "no-store" },
+    // Last.fm asks API clients to identify themselves
+    { cache: "no-store", headers: { "User-Agent": "georgewood.me now-playing" } },
   );
   if (!res.ok) return null;
 

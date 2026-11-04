@@ -11,6 +11,16 @@ export interface Track {
   imageLarge: string;
 }
 
+// If the server can't answer, ask Last.fm from the browser, as the site used to
+async function lastfmFromBrowser(): Promise<Track | null> {
+  const apiKey = "2e7aa7aba14b552f8cf7b048661ff913";
+  const res = await fetch(`https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=georgewood_me&api_key=${apiKey}&format=json&limit=1`);
+  const t = res.ok ? (await res.json())?.recenttracks?.track?.[0] : null;
+  if (!t) return null;
+  const imageOf = (size: string) => t.image?.find((img: { size: string }) => img.size === size)?.["#text"] || "";
+  return { title: t.name, artist: t.artist["#text"], nowPlaying: t["@attr"]?.nowplaying === "true", image: imageOf("small"), imageLarge: imageOf("extralarge") };
+}
+
 export function useRecentTrack() {
   const [track, setTrack] = useState<Track | null>(null);
 
@@ -19,8 +29,10 @@ export function useRecentTrack() {
     const load = () =>
       fetch("/api/now-playing")
         .then((res) => (res.ok ? res.json() : null))
-        .then((data: Track | null) => {
-          if (data?.title) setTrack(data);
+        .catch(() => null)
+        .then((data: Track | null) => (data?.title ? data : lastfmFromBrowser()))
+        .then((data) => {
+          if (data) setTrack(data);
         })
         .catch(() => {});
     load();
