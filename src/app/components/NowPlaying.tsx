@@ -28,9 +28,14 @@ export function useRecentTrack() {
     // Spotify for what's playing now, Last.fm for what played last (see api/now-playing)
     const load = () =>
       fetch("/api/now-playing")
-        .then((res) => (res.ok ? res.json() : null))
+        .then((res) => res.json())
         .catch(() => null)
-        .then((data: Track | null) => (data?.title ? data : lastfmFromBrowser()))
+        .then(async (data: (Track & { idle?: boolean }) | null) => {
+          if (data?.title) return data;
+          const fallback = await lastfmFromBrowser();
+          // Last.fm's "now playing" lingers after a pause, so trust Spotify when it says nothing is on
+          return fallback && data?.idle ? { ...fallback, nowPlaying: false } : fallback;
+        })
         .then((data) => {
           if (data) setTrack(data);
         })

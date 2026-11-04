@@ -77,17 +77,19 @@ async function spotifyNowPlaying(): Promise<Track | null | undefined> {
 }
 
 async function lastfmRecent(): Promise<Track | null> {
-  const apiKey = process.env.LASTFM_API_KEY || LASTFM_PUBLIC_KEY;
-
-  const res = await fetch(
-    `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${LASTFM_USER}&api_key=${apiKey}&format=json&limit=1`,
-    // Last.fm asks API clients to identify themselves
-    { cache: "no-store", headers: { "User-Agent": "georgewood.me now-playing" } },
-  );
-  if (!res.ok) {
+  // The configured key first, then the public one if Last.fm refuses it
+  const keys = [...new Set([process.env.LASTFM_API_KEY, LASTFM_PUBLIC_KEY].filter(Boolean))];
+  let res: Response | null = null;
+  for (const apiKey of keys) {
+    res = await fetch(
+      `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${LASTFM_USER}&api_key=${apiKey}&format=json&limit=1`,
+      // Last.fm asks API clients to identify themselves
+      { cache: "no-store", headers: { "User-Agent": "georgewood.me now-playing" } },
+    );
+    if (res.ok) break;
     problems.push(`lastfm: ${res.status}`);
-    return null;
   }
+  if (!res?.ok) return null;
 
   const t = (await res.json()).recenttracks?.track?.[0];
   if (!t) return null;
@@ -108,6 +110,7 @@ export async function GET() {
   // Last.fm keeps calling a track "now playing" for a while after it's paused or stopped,
   // so once Spotify has said nothing is playing, its last track is only ever "Last played"
   if (live === null && track) track = { ...track, nowPlaying: false };
-  if (!track) return NextResponse.json({ error: "No recent tracks", problems }, { status: 404 });
+  // idle tells the browser's own Last.fm fallback that Spotify has said nothing is playing
+  if (!track) return NextResponse.json({ error: "No recent tracks", idle: live === null, problems }, { status: 404 });
   return NextResponse.json(track, { headers: { "Cache-Control": "no-store" } });
 }
