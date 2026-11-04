@@ -15,9 +15,15 @@ type Track = { title: string; artist: string; nowPlaying: boolean; image: string
 // Access tokens last an hour, so keep one between requests while the server is warm
 let spotifyToken: { value: string; expires: number } | null = null;
 
+// Why each source came up empty, returned with a 404 so a failure can be diagnosed (never any keys)
+let problems: string[] = [];
+
 async function spotifyAccessToken() {
   const { SPOTIFY_CLIENT_ID: id, SPOTIFY_CLIENT_SECRET: secret, SPOTIFY_REFRESH_TOKEN: refresh } = process.env;
-  if (!id || !secret || !refresh) return null;
+  if (!id || !secret || !refresh) {
+    problems.push("spotify: not configured");
+    return null;
+  }
   if (spotifyToken && spotifyToken.expires > Date.now()) return spotifyToken.value;
 
   const res = await fetch("https://accounts.spotify.com/api/token", {
@@ -29,7 +35,10 @@ async function spotifyAccessToken() {
     body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: refresh }),
     cache: "no-store",
   });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    problems.push(`spotify token: ${res.status}`);
+    return null;
+  }
 
   const data = await res.json();
   spotifyToken = { value: data.access_token, expires: Date.now() + (data.expires_in - 60) * 1000 };
@@ -47,7 +56,10 @@ async function spotifyNowPlaying(): Promise<Track | null | undefined> {
   });
   // 204 means nothing is playing
   if (res.status === 204) return null;
-  if (res.status !== 200) return undefined;
+  if (res.status !== 200) {
+    problems.push(`spotify player: ${res.status}`);
+    return undefined;
+  }
 
   const data = await res.json();
   const item = data.item;
@@ -72,7 +84,10 @@ async function lastfmRecent(): Promise<Track | null> {
     // Last.fm asks API clients to identify themselves
     { cache: "no-store", headers: { "User-Agent": "georgewood.me now-playing" } },
   );
-  if (!res.ok) return null;
+  if (!res.ok) {
+    problems.push(`lastfm: ${res.status}`);
+    return null;
+  }
 
   const t = (await res.json()).recenttracks?.track?.[0];
   if (!t) return null;
@@ -87,11 +102,12 @@ async function lastfmRecent(): Promise<Track | null> {
 }
 
 export async function GET() {
-  const live = await spotifyNowPlaying().catch(() => undefined);
-  let track = live ?? (await lastfmRecent().catch(() => null));
+  problems = [];
+  const live = await spotifyNowPlaying().catch((e) => (problems.push(`spotify: ${e}`), undefined));
+  let track = live ?? (await lastfmRecent().catch((e) => (problems.push(`lastfm: ${e}`), null)));
   // Last.fm keeps calling a track "now playing" for a while after it's paused or stopped,
   // so once Spotify has said nothing is playing, its last track is only ever "Last played"
   if (live === null && track) track = { ...track, nowPlaying: false };
-  if (!track) return NextResponse.json({ error: "No recent tracks" }, { status: 404 });
+  if (!track) return NextResponse.json({ error: "No recent tracks", problems }, { status: 404 });
   return NextResponse.json(track, { headers: { "Cache-Control": "no-store" } });
 }
