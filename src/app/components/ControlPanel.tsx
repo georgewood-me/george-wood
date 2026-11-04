@@ -79,7 +79,7 @@ function Slider({
   );
 }
 
-export default function ControlPanel({ containerWidth = 640, desktopTop = 34 }: { containerWidth?: number; desktopTop?: number }) {
+export default function ControlPanel({ containerWidth = 640, desktopTop = 20 }: { containerWidth?: number; desktopTop?: number }) {
   const [open, setOpen] = useState(false);
   const [panelVisible, setPanelVisible] = useState(false);
   const [bg, setBg] = useState(DEFAULTS.bg);

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { LASTFM_PUBLIC_KEY, parseRecentTrack, recentTrackUrl, type Track } from "../../components/lastfm";
 
 export const dynamic = "force-dynamic";
 
@@ -6,19 +7,13 @@ export const dynamic = "force-dynamic";
 // that report to Last.fm late (like the Sonos). When nothing is playing, or Spotify isn't
 // set up, the last track comes from Last.fm as before.
 
-const LASTFM_USER = "georgewood_me";
-// The read-only key the page used when it asked Last.fm from the browser
-const LASTFM_PUBLIC_KEY = "2e7aa7aba14b552f8cf7b048661ff913";
-
-type Track = { title: string; artist: string; nowPlaying: boolean; image: string; imageLarge: string };
-
 // Access tokens last an hour, so keep one between requests while the server is warm
 let spotifyToken: { value: string; expires: number } | null = null;
 
-// Why each source came up empty, returned with a 404 so a failure can be diagnosed (never any keys)
-let problems: string[] = [];
+// Each request collects why a source came up empty, so a failure can be diagnosed (never any keys)
+type Problems = string[];
 
-async function spotifyAccessToken() {
+async function spotifyAccessToken(problems: Problems) {
   const { SPOTIFY_CLIENT_ID: id, SPOTIFY_CLIENT_SECRET: secret, SPOTIFY_REFRESH_TOKEN: refresh } = process.env;
   if (!id || !secret || !refresh) {
     problems.push("spotify: not configured");
@@ -46,8 +41,8 @@ async function spotifyAccessToken() {
 }
 
 // undefined: Spotify couldn't be asked. null: Spotify says nothing is playing.
-async function spotifyNowPlaying(): Promise<Track | null | undefined> {
-  const token = await spotifyAccessToken();
+async function spotifyNowPlaying(problems: Problems): Promise<Track | null | undefined> {
+  const token = await spotifyAccessToken(problems);
   if (!token) return undefined;
 
   const res = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
@@ -66,7 +61,7 @@ async function spotifyNowPlaying(): Promise<Track | null | undefined> {
   // Paused music, podcasts and ads fall through to Last.fm's last track
   if (!data.is_playing || data.currently_playing_type !== "track" || !item) return null;
 
-  const images: { url: string; width: number }[] = item.album?.images ?? [];
+  const images: { url: string }[] = item.album?.images ?? [];
   return {
     title: item.name,
     artist: item.artists.map((a: { name: string }) => a.name).join(", "),
@@ -76,37 +71,25 @@ async function spotifyNowPlaying(): Promise<Track | null | undefined> {
   };
 }
 
-async function lastfmRecent(): Promise<Track | null> {
+async function lastfmRecent(problems: Problems): Promise<Track | null> {
   // The configured key first, then the public one if Last.fm refuses it
-  const keys = [...new Set([process.env.LASTFM_API_KEY, LASTFM_PUBLIC_KEY].filter(Boolean))];
-  let res: Response | null = null;
+  const keys = [...new Set([process.env.LASTFM_API_KEY, LASTFM_PUBLIC_KEY].filter((key): key is string => !!key))];
   for (const apiKey of keys) {
-    res = await fetch(
-      `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${LASTFM_USER}&api_key=${apiKey}&format=json&limit=1`,
+    const res = await fetch(recentTrackUrl(apiKey), {
+      cache: "no-store",
       // Last.fm asks API clients to identify themselves
-      { cache: "no-store", headers: { "User-Agent": "georgewood.me now-playing" } },
-    );
-    if (res.ok) break;
+      headers: { "User-Agent": "georgewood.me now-playing" },
+    });
+    if (res.ok) return parseRecentTrack(await res.json());
     problems.push(`lastfm: ${res.status}`);
   }
-  if (!res?.ok) return null;
-
-  const t = (await res.json()).recenttracks?.track?.[0];
-  if (!t) return null;
-  const imageOf = (size: string) => t.image?.find((img: { size: string }) => img.size === size)?.["#text"] || "";
-  return {
-    title: t.name,
-    artist: t.artist["#text"],
-    nowPlaying: t["@attr"]?.nowplaying === "true",
-    image: imageOf("small"),
-    imageLarge: imageOf("extralarge"),
-  };
+  return null;
 }
 
 export async function GET() {
-  problems = [];
-  const live = await spotifyNowPlaying().catch((e) => (problems.push(`spotify: ${e}`), undefined));
-  let track = live ?? (await lastfmRecent().catch((e) => (problems.push(`lastfm: ${e}`), null)));
+  const problems: Problems = [];
+  const live = await spotifyNowPlaying(problems).catch((e) => (problems.push(`spotify: ${e}`), undefined));
+  let track = live ?? (await lastfmRecent(problems).catch((e) => (problems.push(`lastfm: ${e}`), null)));
   // Last.fm keeps calling a track "now playing" for a while after it's paused or stopped,
   // so once Spotify has said nothing is playing, its last track is only ever "Last played"
   if (live === null && track) track = { ...track, nowPlaying: false };

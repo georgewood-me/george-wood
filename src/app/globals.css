@@ -5,8 +5,6 @@
      large screens get more of both. The header, work rows and testimonial strip all follow these. */
   --tile-px: 20px;
   --tile-py: 28px;
-  --background: #0038FF;
-  --foreground: #ffffff;
   --bg-color: #0038FF;
   --text-color: #ffffff;
   --svg-invert: 0;
@@ -21,11 +19,6 @@
 
 @theme {
   --text-xs--letter-spacing: 0em;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
 }
 
 body {

@@ -2,23 +2,12 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { canvasDpr, hexToRgb, onRootVarsChange, rootVar } from "./rootVars";
-
-export interface Track {
-  title: string;
-  artist: string;
-  nowPlaying: boolean;
-  image: string;
-  imageLarge: string;
-}
+import { LASTFM_PUBLIC_KEY, parseRecentTrack, recentTrackUrl, type Track } from "./lastfm";
 
 // If the server can't answer, ask Last.fm from the browser, as the site used to
 async function lastfmFromBrowser(): Promise<Track | null> {
-  const apiKey = "2e7aa7aba14b552f8cf7b048661ff913";
-  const res = await fetch(`https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=georgewood_me&api_key=${apiKey}&format=json&limit=1`);
-  const t = res.ok ? (await res.json())?.recenttracks?.track?.[0] : null;
-  if (!t) return null;
-  const imageOf = (size: string) => t.image?.find((img: { size: string }) => img.size === size)?.["#text"] || "";
-  return { title: t.name, artist: t.artist["#text"], nowPlaying: t["@attr"]?.nowplaying === "true", image: imageOf("small"), imageLarge: imageOf("extralarge") };
+  const res = await fetch(recentTrackUrl(LASTFM_PUBLIC_KEY));
+  return res.ok ? parseRecentTrack(await res.json()) : null;
 }
 
 export function useRecentTrack() {
